@@ -1,2 +1,2 @@
-# dotfiles
-@laurentkempe dotfiles for dev
+# laurent dotfiles
+My dotfiles for dev
