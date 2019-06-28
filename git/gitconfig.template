@@ -1,0 +1,46 @@
+#
+# Include this file in your .gitconfig via the following command
+#
+#    git config --global include.path ~/.gitconfig.template
+#
+
+[color]
+	diff = auto
+	status = auto
+	branch = auto
+	ui = true
+
+[include]
+	path = ~/.gitconfig.aliases
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+[difftool]
+	prompt = false
+
+[mergetool]
+	prompt = false
+	keepbackup = false
+
+[pager]
+	branch = false
+
+# In centralized workflow, work like upstream with an added safety to refuse to push if the upstream branch’s name is different from the local one.
+[push]
+	default = simple
+	
+[rerere]
+	enabled = true
+	
+[pull]
+	rebase = true		
+
+[branch]
+	autosetuprebase = always
+
+[rebase]
+	autostash = true

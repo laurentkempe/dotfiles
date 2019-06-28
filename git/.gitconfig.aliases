@@ -1,0 +1,49 @@
+#
+# Include this in your own .gitconfig by using the
+# [include] directive with the path to this file
+#
+# [include]
+#    path = ~/.gitconfig.aliases
+#
+# If you don't have any existing includes, you can add this via the following command
+# 
+#   git config --global include.path ~/.gitconfig.aliases
+#
+
+[alias]
+	st = status
+	pf = push -f --force-with-lease
+	co = checkout
+	cl = clean -fxd -e Output
+	dc = diff --cached
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+	ld = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+	lds = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
+	le = log --oneline --decorate
+	standup = log --since yesterday --oneline --author 'Laurent Kempé'
+	fl = log -u
+	dl = "!git ll -1"
+	dlc = diff --cached HEAD^
+	dr = "!f() { git diff "$1"^.."$1"; }; f"
+	lc = "!f() { git ll "$1"^.."$1"; }; f"
+	diffr = "!f() { git diff "$1"^.."$1"; }; f"
+	f = "!git ls-files | where {$_ -match '$1'}"
+	create-pull-request = !sh -c 'stash pull-request \\$0'
+	up = !git pull --rebase --prune $@ && git submodule update --init --recursive
+	save = !git add -A && git commit -m 'SAVEPOINT'
+	undo = reset HEAD~1 --mixed
+	wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
+	amend = commit -a --amend
+	bclean = "!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs -r git branch -d; }; f"
+	bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
+	find = "!f() { git log -S ${1} --source --all; }; f"
+	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+	open = "!explorer `git config remote.origin.url`"
+	browse = "!git open"
+    rview = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); lastMerge=$1; git checkout -b 'review/'$currentBranch $currentBranch && git reset --soft $lastMerge; }; f"
+    review = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); lastMerge=$(git log --merges --format=%H -n 1); git checkout -b 'review/'$currentBranch $currentBranch && git reset --soft $lastMerge; }; f"
+    rdone = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); if [[ ${currentBranch:0:7} != 'review/' ]]; then echo You are not on a review branch!; exit 1; fi && git reset --hard && git checkout ${currentBranch:7} && git branch -d $currentBranch; }; f"
+	# Innoveo alias
+	rel = "!f() { git branch -r | grep "origin/release/"; }; f"
+	nfb = "!f() { releaseBranch=$(git rel); git fetch; git checkout --no-track -b feature/SKYE-$1 $releaseBranch; git push --set-upstream origin feature/SKYE-$1; }; f"
