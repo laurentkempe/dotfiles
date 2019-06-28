@@ -1,2 +1,2 @@
-# laurent dotfiles
-My dotfiles for dev
+# dotfiles
+My dotfiles and scripts for development
