@@ -1,11 +1,9 @@
 # Innoveo Skye Business Canvas
 
-$SkyeBCsolution = [IO.Path]::Combine($global:innoveo.SolutionBasePath, 'Skye.BusinessCanvas.sln') | Resolve-Path
-
 # Development
 
 ${function:bc} = { cd $global:innoveo.SolutionBasePath }
-${function:bcvs} = { bc; vs $SkyeBCsolution }
+${function:bcvs} = { bc; vs ([IO.Path]::Combine($global:innoveo.SolutionBasePath, 'Skye.BusinessCanvas.sln') | Resolve-Path) }
 ${function:bcDev} = { bcvs; bcb; }
 ${function:bcCleanupCode} = { 
     <#
