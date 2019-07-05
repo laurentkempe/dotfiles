@@ -15,8 +15,10 @@ ${function:prj} = { Set-Location ~\projects }
 
 # Windows
 ${function:e} = { explorer '.' }
-${function:vi} = { 'C:\Program Files\Notepad++\notepad++.exe' }
-
+${function:vi} = {
+    param ([string]$filepath)
+    & "C:\Program Files\Notepad++\notepad++.exe" $filepath
+}
 # Chocolatey
 ${function:cu} = { & "choco" upgrade all -y }
 
