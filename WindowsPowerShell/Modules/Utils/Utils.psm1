@@ -11,7 +11,7 @@ ${function:......} = { Set-Location ..\..\..\..\.. }
 ${function:dt} = { Set-Location ~\Desktop }
 ${function:docs} = { Set-Location ~\Documents }
 ${function:dl} = { Set-Location ~\Downloads }
-${function:prj} = { Set-Location ~\projects }
+${function:p} = { Set-Location ~\projects }
 
 # Windows
 ${function:e} = { explorer '.' }
