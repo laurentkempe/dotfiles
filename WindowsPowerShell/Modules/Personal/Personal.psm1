@@ -11,7 +11,7 @@ $GitDiffMarginPath = '~\projects\GitDiffMargin'
 $GitDiffMarginGithubBaseUrl = 'https://github.com/laurentkempe/GitDiffMargin/'
 $GitDiffMarginCIBaseUrl = 'https://dev.azure.com/techheadbrothers/GitDiffMargin/'
 ${function:gd} = { cd $GitDiffMarginPath }
-${function:gdvs} = { gd; vs (Get-Location).Path + "GitDiffMargin.sln" }
+${function:gdvs} = { gd; vs ([IO.Path]::Combine($GitDiffMarginPath, 'GitDiffMargin.sln') | Resolve-Path) }
 ${function:gdPRs} = { openUrl($GitDiffMarginGithubBaseUrl + 'pulls') }
 ${function:gdCI} = { openUrl($GitDiffMarginCIBaseUrl + '_build') }
 
