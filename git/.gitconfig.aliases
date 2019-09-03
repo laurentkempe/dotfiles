@@ -50,5 +50,7 @@
 	nfb = "!f() { releaseBranch=$(git rel); git fetch; git checkout --no-track -b feature/SKYE-$1 $releaseBranch; }; f"
 	# Find feature branch from ticket number
 	fb = "!f() { git branch -r | grep "origin/feature/.*$1.*" | sed "s/origin.//"; }; f"
+	# Checkout feature branch from ticket number
+	cfb = "!f() { featureBranch=$(git fb $1); git checkout $featureBranch; }; f"
 	# Review feature branch from ticket number
-	rfb = "!f() { git fetch; featureBranch=$(git fb $1); echo $featureBranch; git checkout $featureBranch; git review; }; f"
+	rfb = "!f() { git fetch; featureBranch=$(git fb $1); git checkout $featureBranch; git review; }; f"
