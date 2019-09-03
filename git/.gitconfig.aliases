@@ -44,6 +44,11 @@
     rview = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); lastMerge=$1; git checkout -b 'review/'$currentBranch $currentBranch && git reset --soft $lastMerge; }; f"
     review = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); lastMerge=$(git log --merges --format=%H -n 1); git checkout -b 'review/'$currentBranch $currentBranch && git reset --soft $lastMerge; }; f"
     rdone = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); if [[ ${currentBranch:0:7} != 'review/' ]]; then echo You are not on a review branch!; exit 1; fi && git reset --hard && git checkout ${currentBranch:7} && git branch -d $currentBranch; }; f"
-	# Innoveo alias
+	# Innoveo aliases
 	rel = "!f() { git branch -r | grep "origin/release/"; }; f"
-	nfb = "!f() { releaseBranch=$(git rel); git fetch; git checkout --no-track -b feature/SKYE-$1 $releaseBranch; git push --set-upstream origin feature/SKYE-$1; }; f"
+	# Create new feature branch
+	nfb = "!f() { releaseBranch=$(git rel); git fetch; git checkout --no-track -b feature/SKYE-$1 $releaseBranch; }; f"
+	# Find feature branch from ticket number
+	fb = "!f() { git branch -r | grep "origin/feature/.*$1.*" | sed "s/origin.//"; }; f"
+	# Review feature branch from ticket number
+	rfb = "!f() { git fetch; featureBranch=$(git fb $1); echo $featureBranch; git checkout $featureBranch; git review; }; f"
