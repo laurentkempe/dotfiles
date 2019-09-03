@@ -41,9 +41,9 @@
 	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
 	open = "!explorer `git config remote.origin.url`"
 	browse = "!git open"
-    rview = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); lastMerge=$1; git checkout -b 'review/'$currentBranch $currentBranch && git reset --soft $lastMerge; }; f"
-    review = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); lastMerge=$(git log --merges --format=%H -n 1); git checkout -b 'review/'$currentBranch $currentBranch && git reset --soft $lastMerge; }; f"
-    rdone = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); if [[ ${currentBranch:0:7} != 'review/' ]]; then echo You are not on a review branch!; exit 1; fi && git reset --hard && git checkout ${currentBranch:7} && git branch -d $currentBranch; }; f"
+	rview = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); lastMerge=$1; git checkout -b 'review/'$currentBranch $currentBranch && git reset --soft $lastMerge; }; f"
+	review = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); lastMerge=$(git log --merges --format=%H -n 1); git checkout -b 'review/'$currentBranch $currentBranch && git reset --soft $lastMerge; }; f"
+	rdone = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); if [[ ${currentBranch:0:7} != 'review/' ]]; then echo You are not on a review branch!; exit 1; fi && git reset --hard && git checkout ${currentBranch:7} && git branch -d $currentBranch; }; f"
 	# Innoveo aliases
 	rel = "!f() { git branch -r | grep "origin/release/"; }; f"
 	# Create new feature branch
