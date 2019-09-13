@@ -12,6 +12,7 @@
 
 [alias]
 	st = status
+	sb = branch --sort=-committerdate
 	pf = push -f --force-with-lease
 	co = checkout
 	cl = clean -fxd -e Output
