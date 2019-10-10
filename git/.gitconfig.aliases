@@ -54,4 +54,4 @@
 	# Checkout feature branch from ticket number
 	cfb = "!f() { featureBranch=$(git fb $1); git checkout $featureBranch; }; f"
 	# Review feature branch from ticket number
-	rfb = "!f() { git fetch; featureBranch=$(git fb $1); git checkout $featureBranch; git review; }; f"
+	rfb = "!f() { git fetch; featureBranch=$(git fb $1); git checkout $featureBranch; git pull; git review; }; f"
