@@ -62,7 +62,12 @@ ${function:bcNDepend} = {
 
 ${function:bcb} = { openUrl('https://innoveo.atlassian.net/secure/RapidBoard.jspa?rapidView=1') }
 ${function:j} = {
-    $branch = Get-GitBranch
+    param([string]$branch)
+
+    if (!$branch) {
+        $branch = Get-GitBranch
+    }
+
     $branch = $branch.Replace("review/", "")
     $branch = $branch.Replace("feature/", "")
     $branch = $branch.Replace("release/", "")
@@ -77,6 +82,12 @@ ${function:j} = {
     }
 	
     openUrl($url)
+}
+${function:jBranches} = { # Browse all feature branches in Jira
+    $branches = git branch
+    $featureBranches = $branches.Split("`n`r") | Where-Object { $_ -like "*feature/*" } | ForEach-Object { $_ -replace "  " }
+
+    $featureBranches | ForEach-Object { j($_) }
 }
 
 # Github
