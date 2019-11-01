@@ -50,7 +50,7 @@
 	# Create new feature branch
 	nfb = "!f() { releaseBranch=$(git rel); git fetch; git checkout --no-track -b feature/SKYE-$1 $releaseBranch; }; f"
 	# Find feature branch from ticket number
-	fb = "!f() { git branch -a | grep "feature/.*$1.*" | sed "s/origin.//"; }; f"
+	fb = "!f() { git branch -a | grep "feature/.*$1.*" | sed "s/remotes.//" | sed "s/origin.//" | sort -u | head -1; }; f"	
 	# Checkout feature branch from ticket number
 	cfb = "!f() { featureBranch=$(git fb $1); git checkout $featureBranch; }; f"
 	# Review feature branch from ticket number
