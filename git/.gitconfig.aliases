@@ -51,6 +51,8 @@
 	rdone = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); if [[ ${currentBranch:0:7} != 'review/' ]]; then echo You are not on a review branch!; exit 1; fi && git reset --hard && git checkout ${currentBranch:7} && git branch -d $currentBranch; }; f"
 	# Innoveo aliases
 	jiran = "!f() { git rev-parse --abbrev-ref HEAD | sed "s/feature.//" | grep -o -E "SKYE+-[0-9]+"; }; f"
+	# Save prepending the JIRA ticket number
+	s = "!f() { jiraid=$(git jiran); if [ $# -eq 0 ]; then msg='SAVEPOINT'; git save \"$jiraid $msg\"; else git save \"$jiraid $1\"; fi; }; f" 
 	rel = "!f() { git branch -r | grep "origin/release/"; }; f"
 	# Create new feature branch
 	nfb = "!f() { releaseBranch=$(git rel); git fetch; git checkout --no-track -b feature/SKYE-$1 $releaseBranch; }; f"
