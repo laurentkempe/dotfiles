@@ -50,6 +50,7 @@
 	review = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); lastMerge=$(git log --merges --format=%H -n 1); git checkout -b 'review/'$currentBranch $currentBranch && git reset --soft $lastMerge; }; f"
 	rdone = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); if [[ ${currentBranch:0:7} != 'review/' ]]; then echo You are not on a review branch!; exit 1; fi && git reset --hard && git checkout ${currentBranch:7} && git branch -d $currentBranch; }; f"
 	# Innoveo aliases
+	jiran = "!f() { git rev-parse --abbrev-ref HEAD | sed "s/feature.//" | grep -o -E "SKYE+-[0-9]+"; }; f"
 	rel = "!f() { git branch -r | grep "origin/release/"; }; f"
 	# Create new feature branch
 	nfb = "!f() { releaseBranch=$(git rel); git fetch; git checkout --no-track -b feature/SKYE-$1 $releaseBranch; }; f"
