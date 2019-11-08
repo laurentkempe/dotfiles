@@ -36,7 +36,7 @@
 	f = "!git ls-files | where {$_ -match '$1'}"
 	create-pull-request = !sh -c 'stash pull-request \\$0'
 	up = !git pull --rebase --prune $@ && git submodule update --init --recursive
-	save = !git add -A && git commit -m 'SAVEPOINT'
+	save = "!f() { git add -A; if [ $# -eq 0 ]; then msg='SAVEPOINT'; git commit -m \"$msg\"; else git commit -m \"$1\" ; fi }; f" 
 	undo = reset HEAD~1 --mixed
 	wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
 	amend = commit -a --amend
