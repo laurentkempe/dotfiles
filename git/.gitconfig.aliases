@@ -53,7 +53,8 @@
 	jiran = "!f() { git rev-parse --abbrev-ref HEAD | sed "s/feature.//" | grep -o -E "SKYE+-[0-9]+"; }; f"
 	# Save prepending the JIRA ticket number
 	s = "!f() { jiraid=$(git jiran); if [ $# -eq 0 ]; then msg='SAVEPOINT'; git save \"$jiraid $msg\"; else git save \"$jiraid $1\"; fi; }; f" 
-	rel = "!f() { git branch -r | grep "origin/release/"; }; f"
+	# Determine the release branch with blank parameter if their is only one release branch or using first param if there is more (e.g. git rel 7.24)
+	rel = "!f() { git branch -r | if [[ $1 != '' ]]; then grep "origin/release/.*$1"; else grep "origin/release/"; fi; }; f"
 	# Create new feature branch
 	nfb = "!f() { releaseBranch=$(git rel); git fetch; git checkout --no-track -b feature/SKYE-$1 $releaseBranch; }; f"
 	# Find feature branch from ticket number
