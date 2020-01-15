@@ -11,6 +11,7 @@
 #
 
 [alias]
+	ri = "!f() { git rebase -i HEAD~$1; }; f"
 	st = status
 	sb = branch --sort=-committerdate
 	pf = push -f --force-with-lease
