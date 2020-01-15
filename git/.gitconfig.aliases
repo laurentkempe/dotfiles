@@ -57,7 +57,9 @@
 	# Determine the release branch with blank parameter if their is only one release branch or using first param if there is more (e.g. git rel 7.24)
 	rel = "!f() { git branch -r | if [[ $1 != '' ]]; then grep "origin/release/.*$1"; else grep "origin/release/"; fi; }; f"
 	# Create new feature branch
-	nfb = "!f() { releaseBranch=$(git rel); git fetch; git checkout --no-track -b feature/SKYE-$1 $releaseBranch; }; f"
+	nfb = "!f() { releaseBranch=$(git rel); if [[ "$releaseBranch" = *$'\n'* ]] ; then git rel; echo "use enfb - Extended Create new feature branch"; else git fetch; git checkout --no-track -b feature/SKYE-$1 $releaseBranch; fi; }; f"
+	# Extended Create new feature branch - When there is more than one release branch existing
+	enfb = "!f() { releaseBranch=$(git rel $1); git fetch; git checkout --no-track -b feature/SKYE-$2 $releaseBranch; }; f"
 	# Find feature branch from ticket number
 	fb = "!f() { git branch -a | grep "feature/.*$1.*" | sed "s/remotes.//" | sed "s/origin.//" | sort -u | head -1; }; f"	
 	# Checkout feature branch from ticket number
