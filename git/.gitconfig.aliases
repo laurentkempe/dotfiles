@@ -25,10 +25,10 @@
 	ld = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
 	lds = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
 	le = log --oneline --decorate
-	#Last 10 recent worked on branch
-	allrecent = "!f() { git for-each-ref --sort=-committerdate refs/remotes --count=10 --color=always --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) - %(color:bold blue)%(authorname) %(color:green)(%(committerdate:relative))%(color:reset) - %(color:bold red)%(objectname:short)%(color:reset)' | sed "s/origin.//"; }; f"
-	#MY last recent worked on branch, or the one filter by $1
-	recent = "!f() { git allrecent | if [ $# -eq 0 ]; then username=$(git config --get user.name); grep -i \"$username\"; else grep -i \"$1\"; fi; }; f"
+	#Last 20 or $1 recent worked on branch
+	allrecent = "!f() { git for-each-ref --sort=-committerdate refs/remotes --count=${1-20} --color=always --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) - %(color:bold blue)%(authorname) %(color:green)(%(committerdate:relative))%(color:reset) - %(color:bold red)%(objectname:short)%(color:reset)' | sed "s/origin.//"; }; f"
+	#My last recent worked on branch, or the one filtered by $1
+	recent = "!f() { username=${1-$(git config --get user.name)}; git allrecent | grep -i \"$username\"; }; f"
 	standup =  "!f() { username=$(git config --get user.name); git log --since yesterday --oneline --author \"$username\" --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit; }; f"
 	fl = log -u
 	dl = "!git ll -1"
