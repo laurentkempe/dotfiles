@@ -11,6 +11,8 @@
 #
 
 [alias]
+	#Highlights individual character changes and space changes - https://stackoverflow.com/a/25634420/171877
+	dif = diff --color-words='[^[:space:]]|([[:alnum:]]|UTF_8_GUARD)+'
 	ri = "!f() { git rebase -i HEAD~$1; }; f"
 	st = status
 	sb = branch --sort=-committerdate
