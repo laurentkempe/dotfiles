@@ -11,60 +11,101 @@
 #
 
 [alias]
-	#Highlights individual character changes and space changes - https://stackoverflow.com/a/25634420/171877
-	dif = diff --color-words='[^[:space:]]|([[:alnum:]]|UTF_8_GUARD)+'
-	ri = "!f() { git rebase -i HEAD~$1; }; f"
+	## Helpers
 	st = status
-	sb = branch --sort=-committerdate
-	pf = push -f --force-with-lease
-	co = checkout
-	cl = clean -fxd -e Output
-	dc = diff --cached
-	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
-	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
-	ld = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
-	lds = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
-	le = log --oneline --decorate
-	#Last 20 or $1 recent worked on branch
-	allrecent = "!f() { git for-each-ref --sort=-committerdate refs/remotes --count=${1-20} --color=always --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) - %(color:bold blue)%(authorname) %(color:green)(%(committerdate:relative))%(color:reset) - %(color:bold red)%(objectname:short)%(color:reset)' | sed "s/origin.//"; }; f"
-	#My last recent worked on branch, or the one filtered by $1
-	recent = "!f() { username=${1-$(git config --get user.name)}; git allrecent | grep -i \"$username\"; }; f"
-	standup =  "!f() { username=$(git config --get user.name); git log --since yesterday --oneline --author \"$username\" --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit; }; f"
-	fl = log -u
-	dl = "!git ll -1"
-	dlc = diff --cached HEAD^
-	dr = "!f() { git diff "$1"^.."$1"; }; f"
-	lc = "!f() { git ll "$1"^.."$1"; }; f"
-	diffr = "!f() { git diff "$1"^.."$1"; }; f"
-	f = "!git ls-files | where {$_ -match '$1'}"
-	create-pull-request = !sh -c 'stash pull-request \\$0'
-	up = !git pull --rebase --prune $@ && git submodule update --init --recursive
-	save = "!f() { git add -A; if [ $# -eq 0 ]; then msg='SAVEPOINT'; git commit -m \"$msg\"; else git commit -m \"$1\" ; fi }; f" 
-	undo = reset HEAD~1 --mixed
-	wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
-	amend = commit -a --amend
-	bclean = "!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs -r git branch -d; }; f"
-	bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
-	find = "!f() { git log -S ${1} --source --all; }; f"
+	# Open .gitconfig with editor defined
+	ec = config --global -e
+	# List all aliases
 	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
-	open = "!explorer `git config remote.origin.url`"
-	browse = "!git open"
-	rview = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); lastMerge=$1; git checkout -b 'review/'$currentBranch $currentBranch && git reset --soft $lastMerge; }; f"
-	review = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); lastMerge=$(git log --merges --format=%H -n 1); git checkout -b 'review/'$currentBranch $currentBranch && git reset --soft $lastMerge; }; f"
-	rdone = "!f() { currentBranch=$(git rev-parse --abbrev-ref HEAD); if [[ ${currentBranch:0:7} != 'review/' ]]; then echo You are not on a review branch!; exit 1; fi && git reset --hard && git checkout ${currentBranch:7} && git branch -d $currentBranch; }; f"
-	# Innoveo aliases
-	jiran = "!f() { git rev-parse --abbrev-ref HEAD | sed "s/feature.//" | grep -o -E "SKYE+-[0-9]+"; }; f"
+	# Get current branch name
+	currentbranch = rev-parse --abbrev-ref HEAD
+	# Get username
+	username = config --get user.name
+	# Browse repo URL using Windows Web Browser
+	browse = "!explorer `git config remote.origin.url`"
+	# Find $1 in the code even if it was deleted
+	find = "!f() { git log -S ${1} --source --all; }; f"
+
+	## Branch
+	co = checkout
+	# Checkout previous checked out branch
+	cp = checkout -
+	# Lists all branches including remote branches
+	branches = branch -a
+	# Last 20 recent worked on branches from anybody, or last $1
+	allrecent = "!f() { git for-each-ref --sort=-committerdate refs/remotes --count=${1-20} --color=always --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) - %(color:bold blue)%(authorname) %(color:green)(%(committerdate:relative))%(color:reset) - %(color:bold red)%(objectname:short)%(color:reset)' | sed "s/origin.//"; }; f"
+	# My last recent worked on branches, or the one by $1
+	recent = "!f() { git allrecent | grep -i \"${1-$(git username)}\"; }; f"
+
+	## Log
+	# Colorful log with graph
+	lg = "!f() { git log ${1-$(git currentbranch)} --color --graph --pretty=format:'%C(bold red)%h%Creset -%C(yellow)%d%Creset %s %C(green)(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- ; }; f"
+	# Colorful log showing number of added and deleted lines on each file per commit
+	ll = log --color --pretty=format:'%C(bold red)%h%C(yellow)%d %Creset%s %C(green)(%cr) %C(bold blue)<%an>' --numstat
+	# Colorful compact log with relative date
+	ldr = log --pretty=format:'%C(bold red)%h %C(green)%ad%C(yellow)%d %Creset%s %C(bold blue)<%an>' --date=relative
+	# Colorful compact log with short date
+	lds = log --pretty=format:'%C(bold red)%h %C(green)%ad%C(yellow)%d %Creset%s %C(bold blue)<%an>' --date=short
+
+	## Diff
+	# Diff staged files highlighting individual character changes and space changes (see https://stackoverflow.com/questions/3231759/how-can-i-visualize-per-character-differences-in-a-unified-diff-file/25634420#25634420)
+	ds = diff --cached --color-words='[^[:space:]]|([[:alnum:]]|UTF_8_GUARD)+'
+	# Diff HEAD or specified commit with previous one highlighting individual character changes and space changes
+	diffp = "!f() { git diff "${1-HEAD}"^.."${1-HEAD}" --color-words='[^[:space:]]|([[:alnum:]]|UTF_8_GUARD)+'; }; f"
+
+	## Commit
+	amend = commit -a --amend
+
+	## Push
+	# Safer push
+	pf = push -f --force-with-lease
+
+	## Rebase
+	# Rebase interactive on HEAD back to number of commit defined by $1
+	ri = "!f() { git rebase -i HEAD~$1; }; f"
+	# Rebase abort
+	abort = rebase --abort
+
+	## Worklow
+	# Pulls changes from the remote while rebasing any local commit and removing remote-tracking branches that no longer exist on the remote
+	up = !git pull --rebase --prune $@ && git submodule update --init --recursive
+	# Adds all changes including untracked files and creates a commit with default SAVEPOINT message or using $1
+	save = "!f() { git add -A; git commit -m \"${1-SAVEPOINT}\"; }; f" 
+	# Undo last commit keeping it's changed files but not marked for commit
+	undo = reset HEAD~1 --mixed
+	# Commits everything in working directory and then does a hard reset to remove that commit. Use git reflog to restore commit.
+	wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
+	# Deletes all branches merged in specified branch (or master if no branch is specified)
+	bclean = "!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs -r git branch -d; }; f"
+ 	# Switches to specified branch (or master if no branch is specified), runs git up, then runs bclean.
+	bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
+
+	## Innoveo aliases
+	# Clean excluding Output folder
+	cl = clean -fxd -e Output -e -e *.DotSettings*
+	# Get JIRA ticket number
+	jiran = "!f() { git currentbranch | sed "s/feature.//" | grep -o -E "SKYE+-[0-9]+"; }; f"
+	# Open Browser on Jira ticket
+	j = "!explorer https://innoveo.atlassian.net/browse/$(git jiran)"
+	# Open Github to create a PR, viewing already exsting one (better use https://github.com/jcansdale/GitPullRequest)
+	cpr = "!explorer https://github.com/Innoveo/skye-business-canvas/compare/$(git currentbranch)"
 	# Save prepending the JIRA ticket number
-	s = "!f() { jiraid=$(git jiran); if [ $# -eq 0 ]; then msg='SAVEPOINT'; git save \"$jiraid $msg\"; else git save \"$jiraid $1\"; fi; }; f" 
-	# Determine the release branch with blank parameter if their is only one release branch or using first param if there is more (e.g. git rel 7.24)
-	rel = "!f() { git branch -r | if [[ $1 != '' ]]; then grep "origin/release/.*$1"; else grep "origin/release/"; fi; }; f"
+	s = "!f() { jiraid=$(git jiran); git save \"$jiraid ${1-SAVEPOINT}\"; }; f" 
+	# Find release branches. Can be filtered using first param if there is more than one (e.g. git rel 7.24)
+	rel = "!f() { git branch -r | grep "origin/release/.*${1-}"; }; f"
 	# Create new feature branch
 	nfb = "!f() { releaseBranch=$(git rel); if [[ "$releaseBranch" = *$'\n'* ]] ; then git rel; echo "use enfb - Extended Create new feature branch"; else git fetch; git checkout --no-track -b feature/SKYE-$1 $releaseBranch; fi; }; f"
 	# Extended Create new feature branch - When there is more than one release branch existing
 	enfb = "!f() { releaseBranch=$(git rel $1); git fetch; git checkout --no-track -b feature/SKYE-$2 $releaseBranch; }; f"
 	# Find feature branch from ticket number
-	fb = "!f() { git branch -a | grep "feature/.*$1.*" | sed "s/remotes.//" | sed "s/origin.//" | sort -u | head -1; }; f"	
+	fb = "!f() { git branch -a | grep "feature/.*$1.*" | sed "s/remotes.//" | sed "s/origin.//" | sort -u; }; f"
 	# Checkout feature branch from ticket number
-	cfb = "!f() { featureBranch=$(git fb $1); git checkout $featureBranch; }; f"
+	cfb = "!f() { featureBranch=$(git fb $1); if [[ "$featureBranch" = *$'\n'* ]] ; then echo "Checkout the feature branch you prefer:"; git fb $1; else git checkout $featureBranch; git pull; fi; }; f"
 	# Review feature branch from ticket number
-	rfb = "!f() { git fetch; featureBranch=$(git fb $1); git checkout $featureBranch; git pull; git review; }; f"
+	rfb = "!f() { featureBranch=$(git fb $1); if [[ "$featureBranch" = *$'\n'* ]] ; then echo "Checkout the feature branch you prefer:"; git fb $1; else git checkout $featureBranch; git pull; git review; fi; }; f"
+	# Open a review branch, with all commit squashed from $1 sha1 and leaving all your changed files "Changes to be committed"
+	rview = "!f() { currentbranch=$(git currentbranch); lastMerge=$1; git checkout -b 'review/'$currentbranch $currentbranch && git reset --soft $lastMerge; }; f"
+	# Open a review branch, with all commits from last merge coomit squashed and leaving all your changed files "Changes to be committed"
+	review = "!f() { currentbranch=$(git currentbranch); lastMerge=$(git log --merges --format=%H -n 1); git checkout -b 'review/'$currentbranch $currentbranch && git reset --soft $lastMerge; }; f"
+	# Review done, delete the review branch and clean
+	rdone = "!f() { currentbranch=$(git currentbranch); if [[ ${currentbranch:0:7} != 'review/' ]]; then echo You are not on a review branch!; exit 1; fi && git reset --hard && git checkout ${currentbranch:7} && git branch -d $currentbranch; }; f"
