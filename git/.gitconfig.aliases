@@ -109,3 +109,16 @@
 	review = "!f() { currentbranch=$(git currentbranch); lastMerge=$(git log --merges --format=%H -n 1); git checkout -b 'review/'$currentbranch $currentbranch && git reset --soft $lastMerge; }; f"
 	# Review done, delete the review branch and clean
 	rdone = "!f() { currentbranch=$(git currentbranch); if [[ ${currentbranch:0:7} != 'review/' ]]; then echo You are not on a review branch!; exit 1; fi && git reset --hard && git checkout ${currentbranch:7} && git branch -d $currentbranch; }; f"
+
+	# Prepare for review > git cc 7.26
+	# 1. rebase on specified $1 release branch
+	# 2. reformat code 
+	# To do
+	# 3. commit with standard reformat message
+	# 4. create pr
+	files = "!f() { lastMerge=$(git log --merges --format=%H -n 1); git diff --name-only $(git merge-base $lastMerge HEAD); }; f"
+	allfilestoformat = "!f() { git files | grep -E '.cs$|.config$|.xaml$'; }; f"
+	filestoformatwin = "!f() { git files | grep -E '.cs$|.xaml$|.config$' | tr '/' '\\' 2> /dev/null; }; f"
+	rebaserelease = "!f() { git fetch; releaseBranch=$(git rel $1); if [[ "$releaseBranch" = *$'\n'* ]] ; then git rel; echo "Please, specify release number because there is multiple release branches!"; exit 1; else git rebase $releaseBranch; exit 0; fi; }; f"
+	cleancode = "!f(){ cleanupcode.exe --include=$(git filestoformatwin | tr '\n' ';') --settings=Skye.BusinessCanvas.sln.DotSettings --profile=Skye Skye.BusinessCanvas.sln; }; f"
+	cc  = "!f() { git rebaserelease $1; return_val=$?; if [ "$return_val" -eq 0 ]; then git cleancode; else echo "Could not rebase on release branch"; fi; }; f"
