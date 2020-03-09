@@ -33,7 +33,7 @@
 	# Lists all branches including remote branches
 	branches = branch -a
 	# Last 20 recent worked on branches from anybody, or last $1
-	allrecent = "!f() { git for-each-ref --sort=-committerdate refs/remotes --count=${1-20} --color=always --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) - %(color:bold blue)%(authorname) %(color:green)(%(committerdate:relative))%(color:reset) - %(color:bold red)%(objectname:short)%(color:reset)' | sed "s/origin.//"; }; f"
+	allrecent = "!f() { git for-each-ref --sort=-committerdate refs --count=${1-20} --color=always --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) - %(color:bold blue)%(authorname) %(color:green)(%(committerdate:relative))%(color:reset) - %(color:bold red)%(objectname:short)%(color:reset)' | sed "s/origin.//"; }; f"
 	# My last recent worked on branches, or the one by $1
 	recent = "!f() { git allrecent | grep -i \"${1-$(git username)}\"; }; f"
 
