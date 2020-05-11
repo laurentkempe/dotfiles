@@ -4,6 +4,9 @@ $env:LC_ALL = 'C.UTF-8'
 Import-Module 'C:\tools\poshgit\dahlbyk-posh-git-9bda399\src\posh-git.psd1'
 Import-Module oh-my-posh
 Set-Theme Paradox
+# Fix with ConEmu Fonts / Main console=JetBrains Mono and Alternative font=Cascadia Mono with Unicode range=Pseudographics: 2013-25C4;
+$ThemeSettings.PromptSymbols.PromptIndicator = [char]::ConvertFromUtf32(0x25B6)
+$ThemeSettings.GitSymbols.BranchIdenticalStatusToSymbol = [char]::ConvertFromUtf32(0x2261)
 
 Import-Module 'Utils'
 Import-Module 'Personal'
