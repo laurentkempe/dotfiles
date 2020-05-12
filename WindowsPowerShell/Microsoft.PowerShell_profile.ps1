@@ -7,6 +7,7 @@ Set-Theme Paradox
 # Fix with ConEmu Fonts / Main console=JetBrains Mono and Alternative font=Cascadia Mono with Unicode range=Pseudographics: 2013-25C4;
 $ThemeSettings.PromptSymbols.PromptIndicator = [char]::ConvertFromUtf32(0x25B6)
 $ThemeSettings.GitSymbols.BranchIdenticalStatusToSymbol = [char]::ConvertFromUtf32(0x2261)
+$ThemeSettings.GitSymbols.BranchUntrackedSymbol = [char]::ConvertFromUtf32(0x2504)
 
 Import-Module 'Utils'
 Import-Module 'Personal'
