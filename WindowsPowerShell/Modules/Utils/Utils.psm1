@@ -15,6 +15,7 @@ ${function:p} = { Set-Location ~\projects }
 
 # Windows
 ${function:e} = { explorer '.' }
+${function:x} = { exit }
 ${function:vi} = {
     param ([string]$filepath)
     & "C:\Program Files\Notepad++\notepad++.exe" $filepath
