@@ -19,6 +19,16 @@ ${function:vi} = {
     param ([string]$filepath)
     & "C:\Program Files\Notepad++\notepad++.exe" $filepath
 }
+function startProcessHigh ($cliCmd, $cmdWorkingDirectory, $cmdArgs) {
+    $ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $ProcessInfo.FileName = $cliCmd
+    $ProcessInfo.Arguments = $cmdArgs
+    $ProcessInfo.WorkingDirectory = $cmdWorkingDirectory
+    $ProcessInfo.UseShellExecute = $False
+    $newProcess = [System.Diagnostics.Process]::Start($ProcessInfo)
+    $newProcess.PriorityClass = [System.Diagnostics.ProcessPriorityClass]::High
+}
+
 # Chocolatey
 ${function:cu} = { & "choco" upgrade all -y }
 
@@ -29,17 +39,19 @@ ${function:cleanBin} = {
     get-childitem $path -include bin -recurse | remove-item -recurse -confirm:$false
     get-childitem $path -include obj -recurse | remove-item -recurse -confirm:$false
 }
-${function:dev} = {
-    param ([string]$options)
-    & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\Common7\IDE\devenv.exe" $options
-}
 ${function:vs} = {
     param ([string]$solution)
-    $vsTempDir = "C:\VsTemp";
-    $env:TEMP = $vsTempDir
-    $env:TMP = $vsTempDir
-    if (![System.IO.Directory]::Exists($vsTempDir)) { [System.IO.Directory]::CreateDirectory($vsTempDir) }
-    dev $solution
+    if (!$solution) {
+        $solution = (Get-ChildItem *.sln).FullName;
+        if (!$solution) {
+            $solution = (Get-ChildItem *.csproj).FullName;
+        }
+    }
+
+    $open = ($solution.Split(" ") | peco --select-1)
+
+    startProcessHigh "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\Common7\IDE\devenv.exe" . $open
+    Clear-Host
 }
 
 # PowerShell parameter completion shim for the dotnet CLI - https://docs.microsoft.com/en-us/dotnet/core/tools/enable-tab-autocomplete
