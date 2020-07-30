@@ -71,8 +71,8 @@
 	up = !git pull --rebase --prune $@ && git submodule update --init --recursive
 	# Adds all changes including untracked files and creates a commit with default SAVEPOINT message or using $1
 	save = "!f() { git add -A; git commit -m \"${1-SAVEPOINT}\"; }; f" 
-	# Undo last commit keeping it's changed files but not marked for commit
-	undo = reset HEAD~1 --mixed
+	# Undo last commit(s) keeping it's changed files but not marked for commit
+	undo = "!f() { git reset HEAD~${1-1} --mixed; }; f" 
 	# Commits everything in working directory and then does a hard reset to remove that commit. Use git reflog to restore commit.
 	wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
 	# Deletes all branches merged in specified branch (or master if no branch is specified)
