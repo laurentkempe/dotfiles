@@ -80,6 +80,10 @@
  	# Switches to specified branch (or master if no branch is specified), runs git up, then runs bclean.
 	bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
 
+	## Github
+	# Open Github to create a PR, viewing already exsting one (using Github CLI)
+	pr = "!f() { gh pr view --web; }; f"
+
 	## Innoveo aliases
 	# Clean excluding Output folder
 	cl = clean -fxd -e Output -e -e *.DotSettings*
