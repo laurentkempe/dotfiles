@@ -63,6 +63,11 @@ Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock {
     }
 }
 
+# Github Cli
+${function:pr} = {
+    gh pr view --web
+}
+
 # Others
 function openUrl([string]$url) {
     start $url
