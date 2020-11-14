@@ -39,6 +39,8 @@ ${function:cleanBin} = {
     write-host "Cleaning bin and obj from: $path"
     get-childitem $path -include bin -recurse | remove-item -recurse -confirm:$false
     get-childitem $path -include obj -recurse | remove-item -recurse -confirm:$false
+    write-host "Cleaning Output from: $path"
+    Remove-Item -LiteralPath ".\Output" -Force -Recurse -ErrorAction Ignore
 }
 ${function:vs} = {
     param ([string]$solution)
