@@ -56,6 +56,21 @@ ${function:vs} = {
     startProcessHigh "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\Common7\IDE\devenv.exe" . $open
     Clear-Host
 }
+${function:rider} = {
+    param ([string]$solution)
+
+    if (!$solution) {
+        $solution = (Get-ChildItem *.sln).FullName;
+        if (!$solution) {
+            $solution = (Get-ChildItem *.csproj).FullName;
+        }
+    }
+
+    $open = ($solution.Split(" ") | peco --select-1)
+
+    startProcessHigh "C:\Users\laure\AppData\Local\JetBrains\Toolbox\apps\Rider\ch-1\203.5981.141\bin\rider64.exe" . $open
+    Clear-Host
+}
 
 # PowerShell parameter completion shim for the dotnet CLI - https://docs.microsoft.com/en-us/dotnet/core/tools/enable-tab-autocomplete
 Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock {
