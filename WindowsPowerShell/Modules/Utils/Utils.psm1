@@ -68,7 +68,7 @@ ${function:rider} = {
 
     $open = ($solution.Split(" ") | peco --select-1)
 
-    startProcessHigh "C:\Users\laure\AppData\Local\JetBrains\Toolbox\apps\Rider\ch-1\203.5981.141\bin\rider64.exe" . $open
+    startProcessHigh "C:\Users\laure\Desktop\jetbrains\Rider.cmd" . $open
     Clear-Host
 }
 
