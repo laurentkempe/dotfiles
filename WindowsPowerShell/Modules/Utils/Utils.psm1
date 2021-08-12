@@ -42,6 +42,10 @@ ${function:cleanBin} = {
     write-host "Cleaning Output from: $path"
     Remove-Item -LiteralPath ".\Output" -Force -Recurse -ErrorAction Ignore
 }
+${function:cleanNode} = {
+    param ([string]$path = (Get-Location).Path)
+    get-childitem -Path "$path" -Include "node_modules" -Recurse -Directory | Remove-Item -Recurse -Force
+}
 ${function:vs} = {
     param ([string]$solution)
     if (!$solution) {
