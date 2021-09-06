@@ -16,7 +16,7 @@
             "style": "folder"
           }
         },
-        {
+               {
           "type": "git",
           "style": "powerline",
           "powerline_symbol": "\uE0B0",
@@ -25,9 +25,11 @@
           "properties": {
             "display_status": true,
             "display_stash_count": true,
-            "display_upstream_icon": true
+            "display_upstream_icon": true,
+            "display_worktree_count": true
           }
         },
+
         {
           "type": "dotnet",
           "style": "powerline",
