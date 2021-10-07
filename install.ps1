@@ -7,13 +7,13 @@ Param(
 Write-Output "PowerShell $($PSVersionTable.PSEdition) version $($PSVersionTable.PSVersion)"
 
 Set-StrictMode -Version 2.0; $ErrorActionPreference = "Stop"; $ConfirmPreference = "None"; trap { Write-Error $_ -ErrorAction Continue; exit 1 }
-$PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
+#$PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 
 ###########################################################################
 # CONFIGURATION
 ###########################################################################
 
-$BuildProjectFile = "$PSScriptRoot\build\_build.csproj"
+# $BuildProjectFile = "$PSScriptRoot\build\_build.csproj"
 $TempDirectory = "$PSScriptRoot\.cacao\temp"
 
 $DotNetGlobalFile = "$PSScriptRoot\global.json"
