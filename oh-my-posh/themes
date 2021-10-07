@@ -1,41 +1,54 @@
 {
   "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "console_title": true,
+  "console_title_style": "template",
+  "console_title_template": "{{if .Root}}(Admin) {{end}}{{.Folder}}",
   "blocks": [
     {
       "type": "prompt",
       "alignment": "left",
       "segments": [
         {
-          "type": "path",
+          "type": "os",
           "style": "diamond",
-          "powerline_symbol": "\uE0B0",
-          "foreground": "#ffffff",
-          "background": "#ff479c",
+          "leading_diamond": " ",
+          "powerline_symbol": "",
+          "foreground": "#3A86FF",
+          "background": "#282c34",
           "properties": {
-            "prefix": " \uE5FF ",
-            "style": "folder"
+            "prefix": ""
           }
         },
-               {
+        {
+          "type": "path",
+          "style": "diamond",
+          "foreground": "#33DD2D",
+          "background": "#242424",
+          "properties": {
+            "prefix": " \uE5FF ",
+            "style": "agnoster_full"
+          }
+        },
+        {
           "type": "git",
           "style": "powerline",
           "powerline_symbol": "\uE0B0",
-          "foreground": "#193549",
-          "background": "#fffb38",
+          "foreground": "#3A86FF",
+          "background": "#242424",
           "properties": {
             "display_status": true,
             "display_stash_count": true,
             "display_upstream_icon": true,
-            "display_worktree_count": true
+            "display_worktree_count": true,
+            "prefix": ""
           }
         },
-
         {
           "type": "dotnet",
           "style": "powerline",
           "powerline_symbol": "\uE0B0",
-          "foreground": "#3891A6",
-          "background": "#2f2f2f",
+          "foreground": "#ffffff",
+          "background": "#512BD4",
           "properties": {
             "prefix": " \uE77F "
           }
@@ -71,7 +84,11 @@
           "style": "diamond",
           "leading_diamond": "\uE0B6",
           "background": "#2e9599",
-          "foreground": "#111111"
+          "foreground": "#111111",
+          "properties": {
+            "time_format": "15:04:05",
+            "prefix": ""
+          }
         }
       ]
     },
