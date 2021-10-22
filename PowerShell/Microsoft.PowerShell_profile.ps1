@@ -11,6 +11,8 @@ Import-Module 'Personal'
 Import-Module 'Innoveo'
 Import-Module 'dapr'
 Import-Module 'PSKubectlCompletion'
+Import-Module z
+Set-Alias -Name q -value z
 
 Import-Module -Name Terminal-Icons
 Import-Module posh-git
