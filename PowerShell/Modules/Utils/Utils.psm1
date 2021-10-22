@@ -78,7 +78,7 @@ ${function:rider} = {
 
     $open = ($solution.Split(" ") | peco --select-1)
 
-    startProcessHigh "C:\Users\laure\Desktop\jetbrains\Rider.cmd" . $open
+    startProcessHigh "C:\Users\laure\Desktop\jetbrains\RiderRTM.cmd" . $open
 }
 
 # PowerShell parameter completion shim for the dotnet CLI - https://docs.microsoft.com/en-us/dotnet/core/tools/enable-tab-autocomplete
