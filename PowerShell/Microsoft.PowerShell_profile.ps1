@@ -16,7 +16,7 @@ Import-Module -Name Terminal-Icons
 Import-Module posh-git
 #$GitPromptSettings.EnablePromptStatus = $false
 Import-Module oh-my-posh
-Set-PoshPrompt -Theme laurentkempe
+Set-PoshPrompt -Theme ~/laurentkempe.omp.json
 
 Set-PSReadLineOption -PredictionSource History
 Set-PSReadLineOption -PredictionViewStyle ListView
