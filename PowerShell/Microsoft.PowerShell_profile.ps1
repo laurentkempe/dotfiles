@@ -65,7 +65,7 @@ Set-PSReadLineKeyHandler -Key Ctrl+b `
                          -LongDescription "Start environment to blog" `
                          -ScriptBlock {
     [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-    [Microsoft.PowerShell.PSConsoleReadLine]::Insert("wt --startingDirectory ""$env:userprofile\\projects\\blog"" ``; split-pane -p ""Powershell"" --startingDirectory ""$env:userprofile\\projects\\blog"" BlogOps.exe edit ``; split-pane --horizontal -p ""Powershell"" --startingDirectory ""$env:userprofile\\projects\\blog"" BlogOps.exe server --draft ``; move-focus up")
+    [Microsoft.PowerShell.PSConsoleReadLine]::Insert("wt --startingDirectory ""$env:userprofile\\projects\\blog"" ``; split-pane -p ""Powershell"" --startingDirectory ""$env:userprofile\\projects\\blog"" BlogOps.exe edit ``; split-pane --horizontal -p ""Powershell"" --startingDirectory ""$env:userprofile\\projects\\blog"" BlogOps.exe server --draft ``; move-focus up; code ""$env:userprofile\\projects\\blog""")
     [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 }
 
