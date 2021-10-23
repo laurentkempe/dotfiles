@@ -42,7 +42,8 @@
             "display_stash_count": true,
             "display_upstream_icon": true,
             "display_worktree_count": true,
-            "prefix": ""
+            "prefix": "",
+            "postfix": "\u2800"
           }
         },
         {
@@ -52,7 +53,8 @@
           "foreground": "#ffffff",
           "background": "#512BD4",
           "properties": {
-            "prefix": " \uE77F "
+            "prefix": "\u2800\uE77F\u2800",
+            "postfix": "\u2800"
           }
         },
         {
@@ -62,7 +64,8 @@
           "foreground": "#ffffff",
           "background": "#6CA35E",
           "properties": {
-            "prefix": " \uE718 "
+            "prefix": "\u2800\uE718\u2800",
+            "postfix": "\u2800"
           }
         },
         {
@@ -72,7 +75,8 @@
           "foreground": "#ffffff",
           "background": "#4063D8",
           "properties": {
-            "prefix": " \uE738 "
+            "prefix": "\u2800\uE738\u2800",
+            "postfix": "\u2800"
           }
         }
       ]
