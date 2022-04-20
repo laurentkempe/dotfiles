@@ -61,7 +61,7 @@ ${function:vs} = {
         }
     }
 
-    $open = ($solution.Split(" ") | peco --select-1)
+    $open = ($solution.Split(" ") | Select-Object -First 1)
 
     startProcessHigh "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\Common7\IDE\devenv.exe" . $open
     #Clear-Host
@@ -76,7 +76,7 @@ ${function:rider} = {
         }
     }
 
-    $open = ($solution.Split(" ") | peco --select-1)
+    $open = ($solution.Split(" ") | Select-Object -First 1)
 
     startProcessHigh "C:\Users\laure\Desktop\jetbrains\RiderRTM.cmd" . $open
 }
