@@ -126,3 +126,7 @@
 	rebaserelease = "!f() { git fetch; releaseBranch=$(git rel $1); if [[ "$releaseBranch" = *$'\n'* ]] ; then git rel; echo "Please, specify release number because there is multiple release branches!"; exit 1; else git rebase $releaseBranch; exit 0; fi; }; f"
 	cleancode = "!f(){ cleanupcode.exe --include=$(git filestoformatwin | tr '\n' ';') --settings=Skye.BusinessCanvas.sln.DotSettings --profile=Skye Skye.BusinessCanvas.sln; }; f"
 	cc  = "!f() { git rebaserelease $1; return_val=$?; if [ "$return_val" -eq 0 ]; then git cleancode; else echo "Could not rebase on release branch"; fi; }; f"
+	
+[push]
+	default = upstream
+	autoSetupRemote = true
