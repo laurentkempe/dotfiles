@@ -23,7 +23,7 @@
               "C:\\temp": "\ue799"
             }
           },
-          "style": "accordion",
+          "style": "diamond",
           "template": "\u2800\ue5ff {{ .Path }} "
         },
         {
@@ -113,6 +113,6 @@
     }
   ],
   "console_title_template": "{{if .Root}}(Admin) {{end}}{{.Folder}}",
-  "final_space": true,
+  "final_space": true,  
   "version": 2
 }
