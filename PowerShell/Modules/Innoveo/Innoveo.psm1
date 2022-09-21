@@ -7,7 +7,7 @@ ${function:i} = { bc; .. }
 ${function:bcvs} = { bc; vs ([IO.Path]::Combine($global:innoveo.SolutionBasePath, 'Skye.BusinessCanvas.sln') | Resolve-Path) }
 ${function:bcDev} = { bcvs; bcb; }
 ${function:bcClean} = { bc; Remove-Item -Recurse packages; Remove-Item -Recurse Output }
-${function:bcReview} = { i; cd business-canvas-worktree }
+${function:bcReview} = { Param([string] $jiran) i; cd business-canvas-wt; if ($jiran) { git cfb $jiran } }
 ${function:bcCleanupCode} = { 
     <#
 
