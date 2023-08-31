@@ -4,6 +4,9 @@
 #    git config --global include.path ~/.gitconfig.template
 #
 
+[core]
+	longpaths = true
+
 [color]
 	diff = auto
 	status = auto
