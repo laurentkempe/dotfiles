@@ -3,6 +3,8 @@ $global:innoveo = @{
     RepoBaseUrl      = ''
     BoardBaseUrl     = ''
     CIBaseUrl        = ''
+    TeamId           = ''
+    ReviewChannelId  = ''
 }
 
 Import-Module 'Utils'
