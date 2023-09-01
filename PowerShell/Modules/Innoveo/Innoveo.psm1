@@ -147,20 +147,45 @@ ${function:bcCIBuild} = {
 
 # Teams
 
-${function:askReview} = {
+${function:toReview} = {
+   
+    $jiran = git jiran
 
-    $branch = Get-GitBranch
+    Import-Module Microsoft.Graph.Teams
 
-    if ($branch.StartsWith("feature/")) {
-     
-        $branch = $branch.Replace("feature/", "")
-        $splittedBranch = $branch.split("-")
-        $jiraTicket = $splittedBranch[0] + "-" + $splittedBranch[1]
+    Connect-MgGraph -Scopes "ChannelMessage.Send"
 
-        $message = $splittedBranch[0] + "-" + $splittedBranch[1] + " is ready for @Review @jira-help"
-
-        Write-Host $message
-
-        Send-TeamsMessage -URI $global:innoveo.ReviewWebHook -MessageText $message
+    $params = @{
+        body = @{
+            contentType = "html"
+            content = "$jiran is ready for <at id=""0"">Review</at> <at id=""1"">JiraHelp</at>"
+        }
+        mentions = @(
+            @{
+                id = 0
+                mentionText = "Review"
+                mentioned = @{
+                    application = @{
+                        displayName = "Review"
+                        id = "c70570ad-458d-4f42-ac47-e30926cd74b5"
+                        applicationIdentityType = "bot"
+                    }
+                }
+            },
+            @{
+                id = 1
+                mentionText = "JiraHelp"
+                mentioned = @{
+                    application = @{
+                        displayName = "JiraHelp"
+                        id = "65b2a0a7-7449-4ee5-b728-b2d51627c9bb"
+                        applicationIdentityType = "bot"
+                    }
+                }
+            }
+        )
     }
+
+    New-MgTeamChannelMessage -TeamId $global:innoveo.TeamId -ChannelId $global:innoveo.ReviewChannelId -BodyParameter $params
+
 }
