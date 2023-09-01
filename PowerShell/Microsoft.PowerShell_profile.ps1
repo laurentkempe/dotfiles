@@ -5,6 +5,7 @@ $global:innoveo = @{
     CIBaseUrl        = ''
     TeamId           = ''
     ReviewChannelId  = ''
+    JiraAPIToken     = ''
 }
 
 Import-Module 'Utils'
