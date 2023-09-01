@@ -74,7 +74,7 @@ ${function:cleanMergedBranches} = {
     
             if (![string]::IsNullOrWhiteSpace($jiran))
             {
-                $json = curl -S -s -u laurent.kempe@innoveo.com:CB32SJJzI93NnTN8XUOQ6478 -X GET -H 'Content-Type: application/json' https://innoveo.atlassian.net/rest/api/2/search?jql=key%20%3D%20$jiran | jq-win64.exe '.issues[0].fields.customfield_11920'
+                $json = curl -S -s -u $global:innoveo.JiraAPIToken -X GET -H 'Content-Type: application/json' https://innoveo.atlassian.net/rest/api/2/search?jql=key%20%3D%20$jiran | jq-win64.exe '.issues[0].fields.customfield_11920'
     
                 $merged = $json | Select-String "state=MERGED" | Select-Object -Expand Matches | Select-Object -Expand Groups | Select-Object -Expand Value
     
