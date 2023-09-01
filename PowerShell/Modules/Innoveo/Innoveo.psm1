@@ -61,6 +61,39 @@ ${function:bcNDepend} = {
     & explorer $outputFolder
 }
 
+${function:cleanMergedBranches} = {
+
+    $local_branches = git branch --list
+
+    foreach ($local_branch in $local_branches)
+    {
+        $result  = Invoke-Expression "& git ls-remote --heads origin $local_branch"
+        if ([string]::IsNullOrWhiteSpace($result))
+        {
+            $jiran = $local_branch | Select-String "SKYE+-[0-9]+" | Select-Object -Expand Matches | Select-Object -Expand Groups | Select-Object -Expand Value
+    
+            if (![string]::IsNullOrWhiteSpace($jiran))
+            {
+                $json = curl -S -s -u laurent.kempe@innoveo.com:CB32SJJzI93NnTN8XUOQ6478 -X GET -H 'Content-Type: application/json' https://innoveo.atlassian.net/rest/api/2/search?jql=key%20%3D%20$jiran | jq-win64.exe '.issues[0].fields.customfield_11920'
+    
+                $merged = $json | Select-String "state=MERGED" | Select-Object -Expand Matches | Select-Object -Expand Groups | Select-Object -Expand Value
+    
+                $local_branch_trimmed = $local_branch.Trim()
+ 
+                if (![string]::IsNullOrWhiteSpace($merged))
+                {
+                    Write-Host "$local_branch_trimmed [https://innoveo.atlassian.net/browse/$jiran] is not on remote and ticket is merged"
+                    git branch -D $local_branch_trimmed
+                    Write-Host
+                }
+                else {
+                    Write-Host "$local_branch_trimmed is not merged"
+                }
+            }
+        }
+    }
+}
+
 # Jira
 
 Set-JiraConfigServer $global:innoveo.BoardBaseUrl  
