@@ -8,7 +8,6 @@ ${function:bcvs} = { bc; vs ([IO.Path]::Combine($global:innoveo.SolutionBasePath
 ${function:bcDev} = { bcvs; bcb; }
 ${function:bcClean} = { bc; Remove-Item -Recurse packages; Remove-Item -Recurse Output }
 ${function:bcReview} = { Param([string] $jiran) i; cd business-canvas-wt; if ($jiran) { git cfb $jiran } }
-${function:bcReviewReady} = { $jiran = git jiran; Set-Clipboard "$jiran is ready for @Review @JiraHelp"; Write-Host (Get-Clipboard) }
 ${function:bcCleanupCode} = { 
     <#
 
