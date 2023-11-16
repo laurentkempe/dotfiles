@@ -30,6 +30,9 @@ function startProcessHigh ($cliCmd, $cmdWorkingDirectory, $cmdArgs) {
     $newProcess.PriorityClass = [System.Diagnostics.ProcessPriorityClass]::High
 }
 
+# Winget
+${function:wu} = { & "winget" source update; & "winget" upgrade }
+
 # Chocolatey
 ${function:cu} = { & "choco" upgrade all -y }
 
