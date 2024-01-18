@@ -6,6 +6,9 @@ ${function:bc} = { Set-Location $global:innoveo.SolutionBasePath }
 ${function:i} = { bc; .. }
 ${function:bcvs} = { bc; vs ([IO.Path]::Combine($global:innoveo.SolutionBasePath, 'Skye.BusinessCanvas.sln') | Resolve-Path) }
 ${function:bcDev} = { bcvs; bcb; }
+${function:bcClean} = { bc; Remove-Item -Recurse packages; Remove-Item -Recurse Output }
+${function:bcReview} = { Param([string] $jiran) i; cd business-canvas-review; if ($jiran) { git cfb $jiran } }
+${function:jn} = { git jiran | Set-Clipboard }
 ${function:bcCleanupCode} = { 
     <#
 
@@ -57,8 +60,42 @@ ${function:bcNDepend} = {
 	
     & explorer $outputFolder
 }
+${function:cleanMergedBranches} = {
+
+    $local_branches = git branch --list
+
+    foreach ($local_branch in $local_branches)
+    {
+        $result  = Invoke-Expression "& git ls-remote --heads origin $local_branch"
+        if ([string]::IsNullOrWhiteSpace($result))
+        {
+            $jiran = $local_branch | Select-String "SKYE+-[0-9]+" | Select-Object -Expand Matches | Select-Object -Expand Groups | Select-Object -Expand Value
+    
+            if (![string]::IsNullOrWhiteSpace($jiran))
+            {
+                $json = curl -S -s -u $global:innoveo.JiraAPIToken -X GET -H 'Content-Type: application/json' https://innoveo.atlassian.net/rest/api/2/search?jql=key%20%3D%20$jiran | jq-win64.exe '.issues[0].fields.customfield_11920'
+    
+                $merged = $json | Select-String "state=MERGED" | Select-Object -Expand Matches | Select-Object -Expand Groups | Select-Object -Expand Value
+    
+                $local_branch_trimmed = $local_branch.Trim()
+ 
+                if (![string]::IsNullOrWhiteSpace($merged))
+                {
+                    Write-Host "$local_branch_trimmed [https://innoveo.atlassian.net/browse/$jiran] is not on remote and ticket is merged"
+                    git branch -D $local_branch_trimmed
+                    Write-Host
+                }
+                else {
+                    Write-Host "$local_branch_trimmed is not merged"
+                }
+            }
+        }
+    }
+}
 
 # Jira
+
+Set-JiraConfigServer $global:innoveo.BoardBaseUrl  
 
 ${function:bcb} = { openUrl('https://innoveo.atlassian.net/secure/RapidBoard.jspa?rapidView=1') }
 ${function:j} = {
@@ -68,11 +105,11 @@ ${function:j} = {
         $branch = Get-GitBranch
     }
 
-    $branch = $branch.Replace("review/", "")
-    $branch = $branch.Replace("feature/", "")
-    $branch = $branch.Replace("release/", "")
-    $branch = $branch.Replace("bugfix/", "")
-    $splittedBranch = $branch.split("-")
+   $branch = $branch.Replace("review/", "")
+   $branch = $branch.Replace("feature/", "")
+   $branch = $branch.Replace("release/", "")
+   $branch = $branch.Replace("bugfix/", "")
+   $splittedBranch = $branch.split("-")
 	
     if ("master" -eq $splittedBranch[0]) {
         $url = $global:innoveo.BoardBaseUrl + "/secure/RapidBoard.jspa?rapidView=1"
@@ -88,6 +125,15 @@ ${function:jBranches} = { # Browse all feature branches in Jira
     $featureBranches = $branches.Split("`n`r") | Where-Object { $_ -like "*feature/*" } | ForEach-Object { $_ -replace "  " }
 
     $featureBranches | ForEach-Object { j($_) }
+}
+${function:bcbugs} = { # List all BC open bugs
+    Get-JiraIssue -Query 'project = SKYE AND component = BC AND type = Bug AND resolution = Unresolved AND status not in ("In Progress", Closed, Review, Documentation, QA) ORDER BY createdDate ASC, status ASC, Rank2 ASC'
+}
+${function:bcbugscount} = { # Count all BC open bugs
+    bcbugs | Measure-Object | Select-Object -expand Count
+}
+${function:bcreviews} = { # Count all BC open bugs
+    Get-JiraIssue -Query 'project = Skye AND component in (BC) AND assignee = 557058:7782605d-41bc-4aa6-8ea8-5d64ee5ce126 AND status in (Review) ORDER BY Rank2 ASC'
 }
 
 # Github
@@ -129,4 +175,49 @@ ${function:bcCIBuild} = {
 
     Write-Host Started personal build for branch $branch
     Get-FromWeb $url -credential $credentials
+}
+
+# Teams
+
+${function:toReview} = {
+   
+    $jiran = git jiran
+
+    Import-Module Microsoft.Graph.Teams
+
+    Connect-MgGraph -Scopes "ChannelMessage.Send"
+
+    $params = @{
+        body = @{
+            contentType = "html"
+            content = "$jiran is ready for <at id=""0"">Review</at> <at id=""1"">JiraHelp</at>"
+        }
+        mentions = @(
+            @{
+                id = 0
+                mentionText = "Review"
+                mentioned = @{
+                    application = @{
+                        displayName = "Review"
+                        id = "c70570ad-458d-4f42-ac47-e30926cd74b5"
+                        applicationIdentityType = "bot"
+                    }
+                }
+            },
+            @{
+                id = 1
+                mentionText = "JiraHelp"
+                mentioned = @{
+                    application = @{
+                        displayName = "JiraHelp"
+                        id = "bfdb35e0-57a8-41df-a40b-f7282cf44a6a"
+                        applicationIdentityType = "bot"
+                    }
+                }
+            }
+        )
+    }
+
+    New-MgTeamChannelMessage -TeamId $global:innoveo.TeamId -ChannelId $global:innoveo.ReviewChannelId -BodyParameter $params
+
 }
