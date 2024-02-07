@@ -8,6 +8,9 @@ $global:innoveo = @{
     JiraAPIToken     = ''
 }
 
+[console]::InputEncoding = [console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+[Environment]::SetEnvironmentVariable("MSBUILDTERMINALLOGGER", "auto", "User")
+
 Import-Module 'Utils'
 Import-Module 'DockerCompletion'
 Import-Module 'Personal'
