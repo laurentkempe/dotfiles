@@ -1,4 +1,5 @@
 $global:innoveo = @{
+    InnoveoBasePath  = ''
     SolutionBasePath = ''
     RepoBaseUrl      = ''
     BoardBaseUrl     = ''
