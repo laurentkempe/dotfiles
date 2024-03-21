@@ -2,8 +2,9 @@
 
 # Development
 
-${function:bc} = { Set-Location $global:innoveo.SolutionBasePath }
-${function:i} = { bc; .. }
+${function:i} = { Set-Location $global:innoveo.InnoveoBasePath }
+${function:bc} = { Set-Location ($global:innoveo.InnoveoBasePath + "\business-canvas") }
+${function:bc2} = { Set-Location ($global:innoveo.InnoveoBasePath + "\business-canvas-2") }
 ${function:bcvs} = { bc; vs ([IO.Path]::Combine($global:innoveo.SolutionBasePath, 'Skye.BusinessCanvas.sln') | Resolve-Path) }
 ${function:bcDev} = { bcvs; bcb; }
 ${function:bcClean} = { bc; Remove-Item -Recurse packages; Remove-Item -Recurse Output }
