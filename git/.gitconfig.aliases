@@ -104,7 +104,7 @@
 	# Find feature branch from ticket number
 	fb = "!f() { git branch -a | grep "feature/.*$1.*" | sed "s/remotes.//" | sed "s/origin.//" | sort -u; }; f"
 	# Checkout feature branch from ticket number
-	cfb = "!f() { featureBranch=$(git fb $1); if [[ "$featureBranch" = *$'\n'* ]] ; then echo "Checkout the feature branch you prefer:"; git fb $1; else git checkout $featureBranch; git pull; fi; }; f"
+	cfb = "!f() { featureBranch=$(git fb $1); if [[ "$featureBranch" = *$'\n'* ]] ; then echo "Checkout the feature branch you prefer:"; git fetch; git fb $1; else git checkout $featureBranch; git pull; fi; }; f"
 	# Review feature branch from ticket number
 	rfb = "!f() { featureBranch=$(git fb $1); if [[ "$featureBranch" = *$'\n'* ]] ; then echo "Checkout the feature branch you prefer:"; git fb $1; else git checkout $featureBranch; git pull; git review; fi; }; f"
 	# Open a review branch, with all commit squashed from $1 sha1 and leaving all your changed files "Changes to be committed"
