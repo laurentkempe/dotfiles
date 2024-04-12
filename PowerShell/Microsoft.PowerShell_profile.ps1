@@ -27,6 +27,7 @@ Import-Module posh-git
 Import-Module oh-my-posh
 Set-PoshPrompt -Theme ~/laurentkempe.omp.json
 
+Set-PSReadlineOption -HistorySavePath "~\OneDrive\Documents\PowerShell\History\ConsoleHost_history.txt"
 Set-PSReadLineOption -PredictionSource History
 Set-PSReadLineOption -PredictionViewStyle ListView
 Set-PSReadLineOption -EditMode Windows
