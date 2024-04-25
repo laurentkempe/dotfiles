@@ -159,5 +159,48 @@ function Get-Web($url,
     }
 }
 
+# PSReadline Thanks @martinskuta
 
+function MergeFilesAllLinesByPrefix {
+    param(
+        [string]$prefix,
+        [string]$folderPath,
+        [string]$outfile
+    )
+ 
+    # Get all files with a given prefix
+    Write-Host "Getting files in : $($folderPath) with prefix $($prefix)"
+    $files = Get-ChildItem -Path $folderPath -Filter "$prefix*"
+ 
+    # Initialize a hashset to hold unique lines
+    $uniqueLines = New-Object "System.Collections.Generic.HashSet[string]"
+ 
+    foreach ($file in $files) {
+        # Read each line
+        $lines = Get-Content $file.FullName
+        foreach ($line in $lines) {
+            # Add the line to the set, duplicates will be ignored automatically
+            $null= $uniqueLines.Add($line)
+        }
+ 
+        # Delete file after reading its content.
+        Remove-Item $file.FullName
+    }
+ 
+    # Write unique lines to an output file
+    $uniqueLines | Out-File -FilePath $outFile
+}
 
+function ConsolidatePSReadlineSharedHistory(){
+    # Get history file path
+    $historyFilePath = (Get-PSReadlineOption).HistorySavePath
+    # Get FileInfo
+    $fileInfo = Get-Item $historyFilePath
+    # Get directory
+    $historyFileDirectory = $fileInfo.Directory
+    # Get file base name without extension
+    $historyFileNameWithoutExtension = $fileInfo.BaseName
+ 
+    Write-Host "Consolidating powershell history in: $($fileInfo.Directory)"
+    MergeFilesAllLinesByPrefix -prefix $historyFileNameWithoutExtension -folderPath $historyFileDirectory -outfile $historyFilePath
+}
