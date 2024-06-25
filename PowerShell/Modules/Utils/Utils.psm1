@@ -83,7 +83,13 @@ ${function:rider} = {
 
     startProcessHigh "rider.cmd" . $open
 }
-
+# Function to run diff using Rider "rider diff '.\AppCenter 503.txt' '.\AppCenter 505.txt'" which use Resolve-Path to get the full path of both parameters
+${function:dif} = {
+    param ([string]$leftFile, [string]$rightFile)
+    $leftFile = Resolve-Path $leftFile
+    $rightFile = Resolve-Path $rightFile
+    & rider.cmd diff "$leftFile" "$rightFile"
+}
 # PowerShell parameter completion shim for the dotnet CLI - https://docs.microsoft.com/en-us/dotnet/core/tools/enable-tab-autocomplete
 Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock {
     param($commandName, $wordToComplete, $cursorPosition)
