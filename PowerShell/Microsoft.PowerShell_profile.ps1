@@ -59,6 +59,15 @@ Set-PSReadLineKeyHandler -Key Ctrl+j `
     [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 }
 
+Set-PSReadLineKeyHandler -Key Ctrl+t `
+                         -BriefDescription OpenBCTeamCityBranchInBrowser `
+                         -LongDescription "Open BC TeamCity build on the branch" `
+                         -ScriptBlock {
+    [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+    [Microsoft.PowerShell.PSConsoleReadLine]::Insert("bcCIBranch")
+    [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+}
+
 Set-PSReadLineKeyHandler -Key Ctrl+p `
                          -BriefDescription OpenGitHubPRInBrowser `
                          -LongDescription "Open GitHub pull request on the web" `
