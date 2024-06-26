@@ -150,13 +150,13 @@ ${function:bcCommits} = {
 
 ${function:bcCI} = { openUrl($global:innoveo.CIBaseUrl) }
 ${function:bcCIBranch} = {
-    $branch = Get-GitBranch
+    $branch = git currentbranch
     $branch = $branch.Replace("review/", "")
     $branch = $branch.Replace("feature/", "")
     $branch = $branch.Replace("release/", "")
     $branch = $branch.Replace("bugfix/", "")
 
-    $url = $global:innoveo.CIBaseUrl + "viewType.html?buildTypeId=SkyeEditor_Features&branch_SkyeEditor_Features=" + $branch + "&tab=buildTypeStatusDiv"
+    $url = $global:innoveo.CIBaseUrl + "buildConfiguration/BusinessCanvas_Features_Build?branch=" + $branch + "&buildTypeTab=overview&mode=builds"
 
     openUrl($url)
 }
