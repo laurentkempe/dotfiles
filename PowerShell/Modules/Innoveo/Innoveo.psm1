@@ -220,5 +220,27 @@ ${function:toReview} = {
     }
 
     New-MgTeamChannelMessage -TeamId $global:innoveo.TeamId -ChannelId $global:innoveo.ReviewChannelId -BodyParameter $params
+}
+${function:createPatch} = {
+    param([string]$newPatchVersion) # e.g. 9.11.1
 
+    $previousPatchNumber = [int]$newPatchVersion.Split(".")[2] - 1
+    $majorMinorVersion = $newPatchVersion.Substring(0, $newPatchVersion.LastIndexOf("."))
+    $previousTagVersion = "skye-editor-$majorMinorVersion.$previousPatchNumber"
+
+    Write-Host "Create patch $newPatchVersion on top of $previousTagVersion"
+
+    git fetch --tags
+    git checkout -b release/skye-editor-$newPatchVersion $previousTagVersion
+
+    # Update version in build file
+    $buildFile = ".\build\Build.cs"
+    $buildFileContent = Get-Content $buildFile
+    $buildFileContent = $buildFileContent -replace 'const string ReleaseCandidateBuildNumber = ".*";', "const string ReleaseCandidateBuildNumber = ""$newPatchVersion"";"
+    Set-Content $buildFile $buildFileContent
+
+    git add -A $buildFile
+    git commit -m "NOTICKET Update version to $newPatchVersion"
+
+    Write-Host "🎗️ Reminder: Push branch release/skye-editor-$newPatchVersion"
 }
