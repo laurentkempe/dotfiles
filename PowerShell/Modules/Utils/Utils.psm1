@@ -73,9 +73,12 @@ ${function:rider} = {
     param ([string]$solution)
 
     if (!$solution) {
-        $solution = (Get-ChildItem *.sln).FullName;
+        $solution = (Get-ChildItem -Filter *.slnx).FullName;
         if (!$solution) {
-            $solution = (Get-ChildItem *.csproj).FullName;
+            $solution = (Get-ChildItem -Filter *.sln).FullName;
+            if (!$solution) {
+                $solution = (Get-ChildItem *.csproj).FullName;
+            }
         }
     }
 
