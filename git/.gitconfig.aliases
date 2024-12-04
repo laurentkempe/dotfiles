@@ -90,7 +90,7 @@
 	# Get JIRA ticket number
 	jiran = "!f() { git currentbranch | sed "s/feature.//" | grep -o -E "SKYE+-[0-9]+"; }; f"
 	# Open Browser on Jira ticket
-	j = "!explorer https://innoveo.atlassian.net/browse/$(git jiran)"
+	j = "!explorer.exe https://innoveo.atlassian.net/browse/$(git jiran)"
 	# Open Github to create a PR, viewing already exsting one (better use https://github.com/jcansdale/GitPullRequest)
 	cpr = "!explorer https://github.com/Innoveo/skye-business-canvas/compare/$(git currentbranch)"
 	# Save prepending the JIRA ticket number
