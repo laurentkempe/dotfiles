@@ -244,3 +244,46 @@ ${function:createPatch} = {
 
     Write-Host "🎗️ Reminder: Push branch release/skye-editor-$newPatchVersion"
 }
+${function:downloadQADefinitions} = {
+    param([string]$version) # e.g. 10.0.0
+
+    if ([string]::IsNullOrWhiteSpace($version)) {
+        Write-Host "Please provide a version number to download the QA definitions, e.g. 10.0.0"
+        return
+    }
+
+    $outputFile = "skye-qa-test-definitions-skye-$version.zip"
+    if (Test-Path $outputFile) {
+        #Ask the user if he wants to remove the file
+        $response = Read-Host "File $outputFile already exists. Do you want to remove it? (y/n)"
+        if ($response -eq "y") {
+            Remove-Item $outputFile
+        }
+        else {
+            Write-Host "Download aborted"
+            return
+        }
+    }
+
+    $spinner =  @("⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷")
+    $spinnerIndex = 0
+
+    # Start the gh api command as a background job
+    $job = Start-Job -ArgumentList $version, $global:innoveo.QADefinitionRepo -ScriptBlock {
+        param ($version, $repo)
+        gh api -H "Accept: application/vnd.github.v3+json" ("/repos/" + $repo + "/zipball/skye-$version") >> "skye-qa-test-definitions-skye-$version.zip"
+    }
+
+    # Display the spinner while the job is running
+    while ($job.State -eq 'Running') {
+        Write-Host -NoNewline -ForegroundColor Yellow "`r$($spinner[$spinnerIndex]) Downloading QA Definitions..."
+        Start-Sleep -Milliseconds 200
+        $spinnerIndex = ($spinnerIndex + 1) % $spinner.Length
+    }
+
+    # Wait for the job to complete and get the result
+    $result = Receive-Job -Job $job
+    Remove-Job -Job $job
+
+    Write-Host "`rDownload complete!                             "
+}
