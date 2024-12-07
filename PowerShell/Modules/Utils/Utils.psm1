@@ -213,3 +213,7 @@ function ConsolidatePSReadlineSharedHistory(){
     Write-Host "Consolidating powershell history in: $($fileInfo.Directory)"
     MergeFilesAllLinesByPrefix -prefix $historyFileNameWithoutExtension -folderPath $historyFileDirectory -outfile $historyFilePath
 }
+
+function AddAllProjectToSolution(){
+    Get-ChildItem -Recurse -Filter "*.csproj" | ForEach-Object { dotnet sln add $_.FullName }
+}
