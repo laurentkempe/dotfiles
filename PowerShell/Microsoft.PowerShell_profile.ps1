@@ -7,6 +7,11 @@ $global:innoveo = @{
     TeamId           = ''
     ReviewChannelId  = ''
     JiraAPIToken     = ''
+    JiraMeUser       = 'Laurent Kempé'
+    BCTeam           = @(
+                        @{Name = "Laurent Kempé"; GitHubUsername = ""}
+                        @{Name = ""; GitHubUsername = ""}
+                       )
     QADefinitionRepo = ''
 }
 
