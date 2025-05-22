@@ -137,6 +137,22 @@ ${function:bcreviews} = { # Count all BC open bugs
     Get-JiraIssue -Query 'project = Skye AND component in (BC) AND assignee = 557058:7782605d-41bc-4aa6-8ea8-5d64ee5ce126 AND status in (Review) ORDER BY Rank2 ASC'
 }
 
+# Jira & GitHub
+
+${function:assignReview} = { # Assign current ticket linked to the current branch to a user on Jira and add the user as reviewer on GitHub
+    
+    $jiran = git jiran
+
+    $userIndex = Show-Menu -Title "Select a user for $jiran" -Options $global:innoveo.BCTeam
+        if ($null -eq $userIndex) {
+            Write-Host "No user selected. Exiting."
+            return
+        }
+
+    jira issue assign $jiran $global:innoveo.BCTeam[$userIndex].Name
+    gh pr edit '--add-reviewer' $global:innoveo.BCTeam[$userIndex].GitHubUsername
+}
+
 # Github
 
 ${function:bcBranch} = { $branch = Get-GitBranch; openUrl($global:innoveo.RepoBaseUrl + 'tree/' + $branch) }
