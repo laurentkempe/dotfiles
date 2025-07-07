@@ -94,6 +94,47 @@ ${function:cleanMergedBranches} = {
     }
 }
 
+${function:cleanRemoteMergedBranches} = {
+
+    $remoteBranches = Invoke-Expression "& git allfb"
+
+    foreach ($remoteBranch in $remoteBranches) {
+        # $remoteBranch look like "feature/SKYE-15134-V2-Try-Guid-With-MinOccurs - SKYE-15134 Fix failing tests for creation in ProductBrick, ProductPolicyAttribute - Laurent Kempé (7 days ago) - 21b489bbde"
+        # Extract the branch name "feature/SKYE-15134-V2-Try-Guid-With-MinOccurs" and the Jira number "SKYE-15134"
+        $branch = $remoteBranch.Split(" - ")[0].Trim()
+        # Remove ANSI color codes if present
+        $branch = $branch -replace '\x1b\[[0-9;]*m', ''
+        $jiran = $branch | Select-String "SKYE+-[0-9]+" | Select-Object -Expand Matches | Select-Object -Expand Groups | Select-Object -Expand Value
+        
+        if (![string]::IsNullOrWhiteSpace($jiran)) {
+            $json = curl -S -s -u $global:innoveo.JiraAPIToken -X GET -H 'Content-Type: application/json' https://innoveo.atlassian.net/rest/api/2/search?jql=key%20%3D%20$jiran | jq '.issues[0].fields.customfield_11920'
+    
+            $merged = $json | Select-String "state=MERGED" | Select-Object -Expand Matches | Select-Object -Expand Groups | Select-Object -Expand Value
+
+            if (![string]::IsNullOrWhiteSpace($merged))
+            {
+                Write-Host "❌ $branch [https://github.com/Innoveo/skye-business-canvas/branches/all?query=$jiran&lastTab=overview] [https://innoveo.atlassian.net/browse/$jiran] is on remote and ticket is merged"
+                
+                # Delete remote branch
+                Write-Host "Deleting remote branch: $branch"
+                git push origin --delete $branch
+                
+                # Delete local branch if it exists
+                $localBranchExists = git branch --list $branch
+                if (![string]::IsNullOrWhiteSpace($localBranchExists)) {
+                    Write-Host "Deleting local branch: $branch"
+                    git branch -D $branch
+                }
+                
+                Write-Host
+            }
+            else {
+                Write-Host "⚠️ $branch [https://innoveo.atlassian.net/browse/$jiran] is not merged"
+            }
+        }
+    }
+}
+
 # Jira
 
 Set-JiraConfigServer $global:innoveo.BoardBaseUrl  
