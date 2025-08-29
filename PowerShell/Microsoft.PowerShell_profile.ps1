@@ -30,8 +30,7 @@ Set-Alias -Name q -value z
 Import-Module -Name Terminal-Icons
 Import-Module posh-git
 #$GitPromptSettings.EnablePromptStatus = $false
-Import-Module oh-my-posh
-Set-PoshPrompt -Theme ~/laurentkempe.omp.json
+oh-my-posh init pwsh --config ~/laurentkempe.omp.json | Invoke-Expression
 
 Set-PSReadlineOption -HistorySavePath "~\OneDrive\Documents\PowerShell\History\ConsoleHost_history.txt"
 Set-PSReadLineOption -PredictionSource History
