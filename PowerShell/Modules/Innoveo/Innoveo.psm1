@@ -3,6 +3,7 @@
 # Development
 
 ${function:i} = { Set-Location $global:innoveo.InnoveoBasePath }
+${function:com} = { & "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --profile-directory="Profile 1" --launch-workspace="75cf39d6-4326-48df-ae5c-ec9388cc0074" }
 ${function:bc} = { Set-Location ($global:innoveo.InnoveoBasePath + "\business-canvas") }
 ${function:bc2} = { Set-Location ($global:innoveo.InnoveoBasePath + "\business-canvas-2") }
 ${function:bcvs} = { bc; vs ([IO.Path]::Combine($global:innoveo.SolutionBasePath, 'Skye.BusinessCanvas.sln') | Resolve-Path) }
