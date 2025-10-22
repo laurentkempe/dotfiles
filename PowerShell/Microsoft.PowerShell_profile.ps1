@@ -78,7 +78,7 @@ Set-PSReadLineKeyHandler -Key Ctrl+p `
                          -LongDescription "Open GitHub pull request on the web" `
                          -ScriptBlock {
     [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-    [Microsoft.PowerShell.PSConsoleReadLine]::Insert("gh pr view --web")
+    [Microsoft.PowerShell.PSConsoleReadLine]::Insert("pr")
     [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 }
 
