@@ -10,6 +10,15 @@ ${function:bcvs} = { bc; vs ([IO.Path]::Combine($global:innoveo.SolutionBasePath
 ${function:bcDev} = { bcvs; bcb; }
 ${function:bcClean} = { bc; Remove-Item -Recurse packages; Remove-Item -Recurse Output }
 ${function:bcReview} = { Param([string] $jiran) i; cd business-canvas-wt; if ($jiran) { git cfb $jiran } }
+${function:cpr} = { git cpr } 
+${function:pr} = { 
+    # Try to view existing PR, if not found, create a new one
+    $output = gh pr view --web 2>&1
+    if ($output -like "no pull requests found*") {
+        Write-Host "No PR found, creating a new one..."
+        cpr
+    }
+}
 ${function:bcCleanupCode} = { 
     <#
 
