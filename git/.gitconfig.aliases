@@ -91,8 +91,8 @@
 	jiran = "!f() { git currentbranch | sed "s/feature.//" | grep -o -E "SKYE+-[0-9]+"; }; f"
 	# Open Browser on Jira ticket
 	j = "!explorer.exe https://innoveo.atlassian.net/browse/$(git jiran)"
-	# Open Github to create a PR, viewing already exsting one (better use https://github.com/jcansdale/GitPullRequest)
-	cpr = "!explorer https://github.com/Innoveo/skye-business-canvas/compare/$(git currentbranch)"
+	# Create PR with title extracted from branch name
+	cpr = "!f() { branch=$(git currentbranch); ticket=$(echo $branch | sed 's/feature\\///' | grep -o -E '^[A-Z]+-[0-9]+'); desc=$(echo $branch | sed 's/feature\\///' | sed \"s/$ticket-//\" | sed 's/-/ /g' | sed 's/\\b\\(\\w\\)/\\u\\1/g'); title=\"$ticket $desc\"; gh pr create --title \"$title\" --web; }; f"
 	# Save prepending the JIRA ticket number
 	s = "!f() { jiraid=$(git jiran); git save \"$jiraid ${1-SAVEPOINT}\"; }; f" 
 	# Find release branches. Can be filtered using first param if there is more than one (e.g. git rel 7.24)
