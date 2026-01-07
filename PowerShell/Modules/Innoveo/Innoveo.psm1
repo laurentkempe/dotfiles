@@ -288,6 +288,154 @@ ${function:toReview} = {
 
     New-MgTeamChannelMessage -TeamId $global:innoveo.TeamId -ChannelId $global:innoveo.ReviewChannelId -BodyParameter $params
 }
+
+# Slack
+# Note: To post as a user (not a bot), use a User OAuth Token with 'chat:write' scope
+# Generate one at: https://api.slack.com/apps -> Your App -> OAuth & Permissions -> User Token Scopes
+
+$function:toReview = {
+    param(
+        [string]$SlackToken = $global:innoveo.SlackUserToken,
+        [string]$SlackChannel = $global:innoveo.ReviewSlackChannelId,
+        [string]$ReviewBotId = $global:innoveo.ReviewBotId,
+        [switch]$WhatIf,
+        [int]$TimeoutSeconds = 60,
+        [int]$PollIntervalSeconds = 5,
+        [switch]$Quiet
+    )
+
+    if (-not $SlackToken) {
+        Write-Error "SLACK_TOKEN is not set. Use a User OAuth Token and provide via `$global:innoveo.SlackUserToken or -SlackToken parameter."
+        return 1
+    }
+    if (-not $SlackChannel) {
+        Write-Error "SLACK_CHANNEL is not set. Provide via `$global:innoveo.ReviewSlackChannelId` or -SlackChannel parameter."
+        return 1
+    }
+    if(-not $ReviewBotId) {
+        Write-Error "REVIEW_BOT_ID is not set. Provide via `$global:innoveo.ReviewBotId` or -ReviewBotId parameter."
+        return 1
+    }
+
+    # Get current branch name
+    $branch = (& git rev-parse --abbrev-ref HEAD 2>$null)
+    if (-not $branch) {
+        Write-Error "Failed to detect current git branch. Run this script from a git repository."
+        return 1
+    }
+    $branch = $branch.Trim()
+
+    # Extract JIRA ticket (e.g. SKYE-17043)
+    $ticketMatch = [regex]::Match($branch, '[A-Z]+-\d+')
+    if (-not $ticketMatch.Success) {
+        Write-Error "No JIRA ticket found in branch name '$branch'."
+        return 1
+    }
+    $ticket = $ticketMatch.Value
+
+    $message = "$ticket is ready for <@$ReviewBotId>"
+
+    if ($WhatIf) {
+        if (-not $Quiet) {
+            Write-Host "[WhatIf] Would post to Slack channel '$SlackChannel': $message"
+            Write-Host "[WhatIf] Would also wait for first threaded reply (timeout: $TimeoutSeconds seconds)."
+        }
+        return 0
+    }
+
+    $payload = @{ channel = $SlackChannel; text = $message }
+
+    try {
+        $response = Invoke-RestMethod -Uri 'https://slack.com/api/chat.postMessage' -Method Post -Headers @{ Authorization = "Bearer $SlackToken" } -Body ($payload | ConvertTo-Json -Depth 3) -ContentType 'application/json' -TimeoutSec 30
+    } catch {
+        Write-Error "HTTP request to Slack failed: $_"
+        return 1
+    }
+
+    if ($null -eq $response -or $response.ok -ne $true) {
+        $err = if ($response -and $response.error) { $response.error } else { 'unknown_error' }
+        Write-Error "Slack API returned an error: $err"
+        return 1
+    }
+
+    # Successfully posted; thread timestamp is in 'ts'
+    $thread_ts = $response.ts
+    if (-not $Quiet) {
+        Write-Host "Posted to Slack channel '$SlackChannel': $message (ts=$thread_ts)"
+    }
+
+    function Get-FirstThreadReply {
+        param(
+            [string]$Channel,
+            [string]$ThreadTs,
+            [string]$Token
+        )
+        try {
+            $encodedChannel = [System.Uri]::EscapeDataString($Channel)
+            $uri = "https://slack.com/api/conversations.replies?channel=$encodedChannel&ts=$ThreadTs&limit=10"
+            $repliesResp = Invoke-RestMethod -Uri $uri -Method Get -Headers @{ Authorization = "Bearer $Token" }
+        } catch {
+            Write-Error "Failed to fetch thread replies: $_"
+            return $null
+        }
+        if ($null -eq $repliesResp -or $repliesResp.ok -ne $true) { 
+            if (-not $Quiet) {
+                Write-Host "API response not OK: $($repliesResp | ConvertTo-Json -Depth 2)"
+            }
+            return $null 
+        }
+        $messages = $repliesResp.messages
+        if (-not $messages) { return $null }
+        # Filter for bot replies only (messages with bot_id or app_id, excluding the root message)
+        $firstReply = $messages | Where-Object { 
+            $_.ts -ne $ThreadTs -and ($_.bot_id -or $_.app_id)
+        } | Select-Object -First 1
+        return $firstReply
+    }
+
+    # Always wait for reply
+    if (-not $Quiet) {
+        Write-Host "Waiting for reply (timeout: $TimeoutSeconds seconds)..."
+    }
+    $firstReply = $null
+    $endTime = (Get-Date).AddSeconds($TimeoutSeconds)
+    $attemptCount = 0
+    while ((Get-Date) -lt $endTime) {
+        $attemptCount++
+        if (-not $Quiet) {
+            Write-Host "Polling attempt #$attemptCount..."
+        }
+        $firstReply = Get-FirstThreadReply -Channel $SlackChannel -ThreadTs $thread_ts -Token $SlackToken
+        if ($firstReply) { break }
+        Start-Sleep -Seconds $PollIntervalSeconds
+    }
+    
+    if ($firstReply) {
+        # Handle both user replies and bot replies
+        $sender = if ($firstReply.user) { 
+            $firstReply.user 
+        } elseif ($firstReply.bot_id) { 
+            "bot:$($firstReply.bot_id)" 
+        } elseif ($firstReply.username) {
+            $firstReply.username
+        } else { 
+            '<unknown>' 
+        }
+        $text = if ($firstReply.text) { $firstReply.text } else { '<no text>' }
+        if (-not $Quiet) {
+            Write-Host "First threaded reply: $text (by $sender, ts=$($firstReply.ts))"
+        }
+        # Output the full object as JSON to stdout for scripting consumers
+        $firstReply | ConvertTo-Json -Depth 5 | Write-Output
+        return 0
+    } else {
+        if (-not $Quiet) {
+            Write-Host "No threaded replies found for message ts=$thread_ts within timeout ($attemptCount attempts)."
+        }
+        return 0
+    }
+}
+
 ${function:createPatch} = {
     param([string]$newPatchVersion) # e.g. 9.11.1
 
