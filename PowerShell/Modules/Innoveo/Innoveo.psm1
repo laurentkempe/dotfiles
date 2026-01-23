@@ -247,7 +247,7 @@ ${function:bcCIBuild} = {
 
 # Teams
 
-${function:toReview} = {
+${function:toReviewTeams} = {
    
     $jiran = git jiran
 
@@ -256,29 +256,29 @@ ${function:toReview} = {
     Connect-MgGraph -Scopes "ChannelMessage.Send"
 
     $params = @{
-        body = @{
+        body     = @{
             contentType = "html"
-            content = "$jiran is ready for <at id=""0"">Review</at> <at id=""1"">JiraHelp</at>"
+            content     = "$jiran is ready for <at id=""0"">Review</at> <at id=""1"">JiraHelp</at>"
         }
         mentions = @(
             @{
-                id = 0
+                id          = 0
                 mentionText = "Review"
-                mentioned = @{
+                mentioned   = @{
                     application = @{
-                        displayName = "Review"
-                        id = "c70570ad-458d-4f42-ac47-e30926cd74b5"
+                        displayName             = "Review"
+                        id                      = "c70570ad-458d-4f42-ac47-e30926cd74b5"
                         applicationIdentityType = "bot"
                     }
                 }
             },
             @{
-                id = 1
+                id          = 1
                 mentionText = "JiraHelp"
-                mentioned = @{
+                mentioned   = @{
                     application = @{
-                        displayName = "JiraHelp"
-                        id = "65b2a0a7-7449-4ee5-b728-b2d51627c9bb"
+                        displayName             = "JiraHelp"
+                        id                      = "bfdb35e0-57a8-41df-a40b-f7282cf44a6a"
                         applicationIdentityType = "bot"
                     }
                 }
@@ -333,7 +333,9 @@ $function:toReview = {
     }
     $ticket = $ticketMatch.Value
 
-    $message = "$ticket is ready for <@$ReviewBotId>"
+    # Format ticket as a link to trigger Jira app unfurling
+    $jiraUrl = "$($global:innoveo.BoardBaseUrl)browse/$ticket"
+    $message = "<$jiraUrl|$ticket> is ready for <@$ReviewBotId>"
 
     if ($WhatIf) {
         if (-not $Quiet) {
@@ -362,6 +364,23 @@ $function:toReview = {
     $thread_ts = $response.ts
     if (-not $Quiet) {
         Write-Host "Posted to Slack channel '$SlackChannel': $message (ts=$thread_ts)"
+    }
+
+    function Get-SlackUserName {
+        param(
+            [string]$UserId,
+            [string]$Token
+        )
+        try {
+            $uri = "https://slack.com/api/users.info?user=$UserId"
+            $userResp = Invoke-RestMethod -Uri $uri -Method Get -Headers @{ Authorization = "Bearer $Token" } -TimeoutSec 10
+            if ($userResp -and $userResp.ok -eq $true -and $userResp.user) {
+                return $userResp.user.real_name
+            }
+        } catch {
+            # Silently fail and return null
+        }
+        return $null
     }
 
     function Get-FirstThreadReply {
@@ -413,7 +432,8 @@ $function:toReview = {
     if ($firstReply) {
         # Handle both user replies and bot replies
         $sender = if ($firstReply.user) { 
-            $firstReply.user 
+            $userName = Get-SlackUserName -UserId $firstReply.user -Token $SlackToken
+            if ($userName) { $userName } else { $firstReply.user }
         } elseif ($firstReply.bot_id) { 
             "bot:$($firstReply.bot_id)" 
         } elseif ($firstReply.username) {
@@ -422,11 +442,22 @@ $function:toReview = {
             '<unknown>' 
         }
         $text = if ($firstReply.text) { $firstReply.text } else { '<no text>' }
+        
+        # Replace user mentions in the text with real names
+        if ($text -ne '<no text>') {
+            $userMentions = [regex]::Matches($text, '<@([A-Z0-9]+)>')
+            foreach ($match in $userMentions) {
+                $userId = $match.Groups[1].Value
+                $realName = Get-SlackUserName -UserId $userId -Token $SlackToken
+                if ($realName) {
+                    $text = $text -replace "<@$userId>", "@$realName"
+                }
+            }
+        }
+        
         if (-not $Quiet) {
             Write-Host "First threaded reply: $text (by $sender, ts=$($firstReply.ts))"
         }
-        # Output the full object as JSON to stdout for scripting consumers
-        $firstReply | ConvertTo-Json -Depth 5 | Write-Output
         return 0
     } else {
         if (-not $Quiet) {
