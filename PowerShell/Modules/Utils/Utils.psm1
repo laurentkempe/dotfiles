@@ -217,3 +217,112 @@ function ConsolidatePSReadlineSharedHistory(){
 function AddAllProjectToSolution(){
     Get-ChildItem -Recurse -Filter "*.csproj" | ForEach-Object { dotnet sln add $_.FullName }
 }
+
+function Show-Toast {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Title,
+
+        [Parameter(Mandatory)]
+        [string]$Message,
+
+        [Parameter()]
+        [string]$AppId = "PowerShell"
+    )
+
+    if (-not [OperatingSystem]::IsWindows()) {
+        Write-Error "Show-Toast is only supported on Windows."
+        return
+    }
+
+    try {
+        Add-Type -AssemblyName System.Runtime.WindowsRuntime -ErrorAction SilentlyContinue | Out-Null
+
+        $escapedTitle = [System.Security.SecurityElement]::Escape($Title)
+        $escapedMessage = [System.Security.SecurityElement]::Escape($Message)
+
+        $toastXml = @"
+<toast activationType="foreground">
+  <visual>
+    <binding template="ToastGeneric">
+      <text>$escapedTitle</text>
+      <text>$escapedMessage</text>
+    </binding>
+  </visual>
+</toast>
+"@
+
+        $resolveType = {
+            param([string[]]$TypeNames)
+            foreach ($name in $TypeNames) {
+                $resolved = [Type]::GetType($name, $false)
+                if ($null -ne $resolved) {
+                    return $resolved
+                }
+            }
+            return $null
+        }
+
+        $toastManagerType = & $resolveType @(
+            'Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType=WindowsRuntime',
+            'Windows.UI.Notifications.ToastNotificationManager, Windows, ContentType=WindowsRuntime'
+        )
+
+        $toastType = & $resolveType @(
+            'Windows.UI.Notifications.ToastNotification, Windows.UI.Notifications, ContentType=WindowsRuntime',
+            'Windows.UI.Notifications.ToastNotification, Windows, ContentType=WindowsRuntime'
+        )
+
+        $xmlDocumentType = & $resolveType @(
+            'Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType=WindowsRuntime',
+            'Windows.Data.Xml.Dom.XmlDocument, Windows.Data, ContentType=WindowsRuntime',
+            'Windows.Data.Xml.Dom.XmlDocument, Windows, ContentType=WindowsRuntime'
+        )
+
+        if ($toastManagerType -and $toastType -and $xmlDocumentType) {
+            $xmlDocument = $xmlDocumentType.GetConstructor(@()).Invoke(@())
+            $xmlDocumentType.GetMethod('LoadXml', [Type[]]@([string])).Invoke($xmlDocument, @($toastXml)) | Out-Null
+
+            $toast = $toastType.GetConstructor([Type[]]@($xmlDocumentType)).Invoke(@($xmlDocument))
+
+            $createToastNotifier = $null
+            $notifier = $null
+
+            if (-not [string]::IsNullOrWhiteSpace($AppId)) {
+                $createToastNotifier = $toastManagerType.GetMethod('CreateToastNotifier', [Type[]]@([string]))
+                if ($createToastNotifier) {
+                    try {
+                        $notifier = $createToastNotifier.Invoke($null, @($AppId))
+                    }
+                    catch {
+                        $notifier = $null
+                    }
+                }
+            }
+
+            if ($null -eq $notifier) {
+                $createToastNotifier = $toastManagerType.GetMethod('CreateToastNotifier', [Type[]]@())
+                $notifier = $createToastNotifier.Invoke($null, @())
+            }
+
+            $notifier.GetType().GetMethod('Show').Invoke($notifier, @($toast)) | Out-Null
+            return
+        }
+
+        if (-not (Get-Command New-BurntToastNotification -ErrorAction SilentlyContinue)) {
+            Import-Module BurntToast -ErrorAction SilentlyContinue
+        }
+
+        if (Get-Command New-BurntToastNotification -ErrorAction SilentlyContinue) {
+            New-BurntToastNotification -Text $Title, $Message | Out-Null
+            return
+        }
+
+        throw "Windows toast APIs are unavailable in this PowerShell host. Install BurntToast (`Install-Module BurntToast -Scope CurrentUser`) or run in Windows PowerShell 5.1."
+    }
+    catch {
+        Write-Error "Failed to show toast notification. $($_.Exception.Message)"
+    }
+}
+
