@@ -533,3 +533,63 @@ ${function:downloadQADefinitions} = {
 
     Write-Host "`rDownload complete!                             "
 }
+
+function Show-Menu {
+    param (
+        [string]$Title = 'Select a user',
+        [array]$Options
+    )
+    
+    $selectedIndex = 0
+    $lastIndex = $Options.Count - 1
+    $menuLines = 1 + $Options.Count + 1 # Title + options + usage line
+    $firstRun = $true
+
+    function Clear-MenuLines {
+        $cursor = $host.UI.RawUI.CursorPosition
+        $top = $cursor.Y - $menuLines
+        if ($top -lt 0) { $top = 0 }
+        for ($i = 0; $i -lt $menuLines; $i++) {
+            $host.UI.RawUI.CursorPosition = @{ X = 0; Y = $top + $i }
+            Write-Host (' ' * ($host.UI.RawUI.WindowSize.Width - 1)) -NoNewline
+        }
+        $host.UI.RawUI.CursorPosition = @{ X = 0; Y = $top }
+    }
+
+    while ($true) {
+        if (-not $firstRun) {
+            Clear-MenuLines
+        } else {
+            $firstRun = $false
+        }
+
+        Write-Host $Title
+        for ($i = 0; $i -lt $Options.Count; $i++) {
+            if ($i -eq $selectedIndex) {
+                Write-Host ">> $($Options[$i].Name) <<" -ForegroundColor Green
+            } else {
+                Write-Host "   $($Options[$i].Name)"
+            }
+        }
+        Write-Host "Use arrow keys to navigate, Enter to select"
+
+        $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+
+        switch ($key.VirtualKeyCode) {
+            38 { # Up arrow
+                if ($selectedIndex -gt 0) { $selectedIndex-- }
+            }
+            40 { # Down arrow
+                if ($selectedIndex -lt $lastIndex) { $selectedIndex++ }
+            }
+            13 { # Enter
+                Clear-MenuLines
+                return $selectedIndex
+            }
+            27 { # Escape
+                Clear-MenuLines
+                return $null
+            }
+        }
+    }
+}
