@@ -4,7 +4,65 @@
 
 ${function:i} = { Set-Location $global:innoveo.InnoveoBasePath }
 ${function:com} = { & "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --profile-directory="Profile 1" --launch-workspace="75cf39d6-4326-48df-ae5c-ec9388cc0074" }
-${function:bc} = { Set-Location ($global:innoveo.InnoveoBasePath + "\business-canvas") }
+${function:bc} = {
+    Param([string]$ticket)
+
+    if (-not (Get-Command -Name Read-SpectreSelection -ErrorAction SilentlyContinue)) {
+        Import-Module PwshSpectreConsole -ErrorAction Stop
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($ticket)) {
+        $found = Get-ChildItem -LiteralPath $global:innoveo.TrunkBasePath -Directory | Where-Object { $_.Name -match $ticket } | Select-Object -First 1
+        if ($found) {
+            Set-Location $found.FullName
+            $Host.UI.RawUI.WindowTitle = ($found.Name -replace '^feature-', '')
+            & git fetch --all --tags --prune
+        }
+        else {
+             & git -C $global:innoveo.TrunkBasePath fetch --all --tags --prune
+             $branches = @(git -C $global:innoveo.TrunkBasePath branches | Where-Object { $_ -match $ticket } | ForEach-Object { $_.Trim() -replace '^(remotes/)?origin/', '' })
+            
+            if ($branches.Count -eq 0) {
+                 Write-Host "Folder and branch not found for ticket: $ticket" -ForegroundColor Red
+            }
+            elseif ($branches.Count -eq 1) {
+                Set-Location ($global:innoveo.TrunkBasePath)
+                git-wt switch $branches[0]
+            }
+            else {
+                $options = @(
+                    [PSCustomObject]@{ Name = 'Cancel'; Branch = $null; IsCancel = $true }
+                    $branches | ForEach-Object { [PSCustomObject]@{ Name = $_; Branch = $_; IsCancel = $false } }
+                )
+                $pageSize = [Math]::Max($options.Count, 1)
+                $selected = Read-SpectreSelection -Message "Select a branch" -Choices $options -ChoiceLabelProperty Name -EnableSearch -PageSize $pageSize
+                if ($selected -and -not $selected.IsCancel) {
+                    Set-Location ($global:innoveo.TrunkBasePath)
+                    git-wt switch $selected.Branch
+                }
+            }
+        }
+    }
+    else {
+        $folders = @(Get-ChildItem -LiteralPath $global:innoveo.TrunkBasePath -Directory | Where-Object { $_.Name -ne '.config' } | ForEach-Object { $_.Name })
+        $options = @(
+            [PSCustomObject]@{ Name = 'Cancel'; Folder = $null; IsCancel = $true }
+            $folders | ForEach-Object {
+                [PSCustomObject]@{
+                    Name = ($_ -replace '^feature-', '')
+                    Folder = $_
+                    IsCancel = $false
+                }
+            }
+        )
+        $pageSize = [Math]::Max($options.Count, 1)
+        $selected = Read-SpectreSelection -Message "Select a folder" -Choices $options -ChoiceLabelProperty Name -EnableSearch -PageSize $pageSize
+        if ($selected -and -not $selected.IsCancel) {
+            Set-Location (Join-Path -Path $global:innoveo.TrunkBasePath -ChildPath $selected.Folder)
+            $Host.UI.RawUI.WindowTitle = ($selected.Folder -replace '^feature-', '')
+        }
+    }
+}
 ${function:bc2} = { Set-Location ($global:innoveo.InnoveoBasePath + "\business-canvas-2") }
 ${function:bcvs} = { bc; vs ([IO.Path]::Combine($global:innoveo.SolutionBasePath, 'Skye.BusinessCanvas.sln') | Resolve-Path) }
 ${function:bcDev} = { bcvs; bcb; }
